@@ -870,20 +870,20 @@
 
       <div class="contact-sheet">
         <figure class="shot shot--lead">
-          <img src="frames/desktop/frame-0012.webp" alt="Sound waves rippling inward across a dark field" loading="lazy" width="1920" height="1080">
-          <figcaption class="micro"><span>A — Sound before notation</span><span>m. 012</span></figcaption>
+          <img src="frames/desktop/frame-0016.webp" alt="Sound waves rippling inward across a dark field" loading="lazy" width="1920" height="1080">
+          <figcaption class="micro"><span>A — Sound before notation</span><span>m. 016</span></figcaption>
         </figure>
         <figure class="shot shot--top">
-          <img src="frames/desktop/frame-0043.webp" alt="Particles swirling into a vortex at the centre of the frame" loading="lazy" width="1920" height="1080">
-          <figcaption class="micro"><span>C — Gathering</span><span>m. 043</span></figcaption>
+          <img src="frames/desktop/frame-0059.webp" alt="Particles swirling into a vortex at the centre of the frame" loading="lazy" width="1920" height="1080">
+          <figcaption class="micro"><span>C — Gathering</span><span>m. 059</span></figcaption>
         </figure>
         <figure class="shot shot--low">
-          <img src="frames/desktop/frame-0063.webp" alt="A glowing treble clef outline resolving out of light" loading="lazy" width="1920" height="1080">
-          <figcaption class="micro"><span>D — The clef resolves</span><span>m. 063</span></figcaption>
+          <img src="frames/desktop/frame-0086.webp" alt="A glowing treble clef outline resolving out of light" loading="lazy" width="1920" height="1080">
+          <figcaption class="micro"><span>D — The clef resolves</span><span>m. 086</span></figcaption>
         </figure>
         <figure class="shot shot--end">
-          <img src="frames/desktop/frame-0102.webp" alt="The finished glass treble clef turning slowly" loading="lazy" width="1920" height="1080">
-          <figcaption class="micro"><span>F — Legible at last</span><span>m. 102</span></figcaption>
+          <img src="frames/desktop/frame-0139.webp" alt="The finished glass treble clef turning slowly" loading="lazy" width="1920" height="1080">
+          <figcaption class="micro"><span>F — Legible at last</span><span>m. 139</span></figcaption>
         </figure>
       </div>
 
@@ -906,11 +906,16 @@
     (() => {
       "use strict";
 
-      const FRAME_COUNT = 110;
+      const FRAME_COUNT = 150;
       const FRAME_PAD = 4;
-      const LERP_FACTOR = 0.115;
-      const DWELL_WIDTH = 0.038;
-      const DWELL_PEAK = 2.75;
+      // Gentler dwell than the starter default: the original DWELL_PEAK/WIDTH
+      // (2.75 / .038) decelerated hard enough near each chapter to read as
+      // "sticky" scrolling rather than cinematic pacing. LERP raised from
+      // .115 so the drawn frame chases the scroll target closer to 1:1
+      // instead of visibly lagging behind a fast flick.
+      const LERP_FACTOR = 0.22;
+      const DWELL_WIDTH = 0.05;
+      const DWELL_PEAK = 1.9;
       const LUT_SIZE = 2400;
       const MOBILE_QUERY = "(max-width: 780px)";
       const REDUCED_QUERY = "(prefers-reduced-motion: reduce)";
@@ -1026,7 +1031,7 @@
         return store.promises[index];
       }
 
-      async function loadInBatches(indices, size = 8, store = activeStore) {
+      async function loadInBatches(indices, size = 16, store = activeStore) {
         for (let start = 0; start < indices.length; start += size) {
           const batch = indices.slice(start, start + size);
           await Promise.all(batch.map((index) => loadFrame(index, store)));
@@ -1181,6 +1186,8 @@
         loader.setAttribute("aria-label", "The film frames could not be loaded. Reload the page to try again.");
       }
 
+      let lastPrioritized = -1;
+
       function tick() {
         if (!pageVisible) return;
         const raw = rawScrollProgress();
@@ -1191,6 +1198,17 @@
         drawFrame(frame);
         updateChapters(effective);
         updateInterface(raw, effective, frame);
+
+        // The background batch loader walks frames in a fixed order, so a
+        // fast scroll can outrun it and land on an unloaded frame — that's
+        // what reads as choppy pop-in, not the LERP or dwell pacing. Jump
+        // the exact frame the scroll is heading toward to the front of the
+        // queue; loadFrame() is memoized, so this is a no-op once it lands.
+        if (targetFrame !== lastPrioritized && !activeStore.loaded[targetFrame]) {
+          lastPrioritized = targetFrame;
+          loadFrame(targetFrame);
+        }
+
         rafId = requestAnimationFrame(tick);
       }
 
@@ -1249,7 +1267,7 @@
 
         const byDistance = Array.from({ length: FRAME_COUNT }, (_, index) => index)
           .sort((a, b) => Math.abs(a - frame) - Math.abs(b - frame));
-        loadInBatches(byDistance, 8, activeStore);
+        loadInBatches(byDistance, 16, activeStore);
       }
 
       window.addEventListener("resize", () => {
