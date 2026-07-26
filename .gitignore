@@ -1,0 +1,6 @@
+# Single-file build produced for artifact previews — regenerate, don't commit
+preview.html
+
+node_modules/
+.DS_Store
+Thumbs.db

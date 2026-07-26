@@ -1,0 +1,33 @@
+{
+  "source": {
+    "filename": "glass-clef-hero-graded.mp4",
+    "duration": 10.084,
+    "resolution": "1920x1080",
+    "fps": 24.0,
+    "codec": "h264",
+    "origin": "Higgsfield Cinema Studio 3.0, end-frame bound to the glass treble clef reference",
+    "post": "Colour graded colder and darker toward the reference; speed-ramped through the edge-on rotation at ~7.0s (1.5x slow-in, 2.5x through, length preserved). Master: glass-clef-hero.mp4"
+  },
+  "frames": {
+    "target_count": 110,
+    "format": "webp",
+    "quality": 68,
+    "naming_pattern": "frame-{NNNN}.webp"
+  },
+  "desktop": {
+    "resolution": "1920x1080",
+    "actual_count": 110,
+    "total_mb": 4.1,
+    "avg_frame_kb": 38
+  },
+  "mobile": {
+    "resolution": "960x540",
+    "actual_count": 110,
+    "total_mb": 1.75,
+    "avg_frame_kb": 16
+  },
+  "recommended_scroll_height": "680vh",
+  "mobile_scroll_height": "600vh",
+  "chapter_centers": [0.045, 0.2, 0.38, 0.565, 0.72, 0.925],
+  "created": "2026-07-26T07:30:00"
+}
