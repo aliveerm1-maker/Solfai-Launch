@@ -171,7 +171,7 @@
 
     /* ---------- Stage ---------- */
 
-    .sequence { position: relative; height: 680vh; background: var(--ink); }
+    .sequence { position: relative; height: 520vh; background: var(--ink); }
 
     .stage {
       position: sticky;
@@ -623,7 +623,7 @@
 
       .site-header { grid-template-columns: 1fr auto; min-height: 58px; }
       .site-header__center { display: none; }
-      .sequence { height: 600vh; }
+      .sequence { height: 440vh; }
 
       .stage__scrim {
         background:
@@ -751,7 +751,7 @@
   <div class="loader" id="loader" aria-label="Loading the image sequence">
     <div class="loader__mark">
       <p class="loader__number" aria-hidden="true">do</p>
-      <div class="loader__meta">Solfai<br>Film sequence<br>10.04 seconds</div>
+      <div class="loader__meta">Solfai<br>Film sequence<br>481 frames</div>
     </div>
     <div class="loader__foot">
       <span class="micro" id="loader-label">Tuning</span>
@@ -870,20 +870,20 @@
 
       <div class="contact-sheet">
         <figure class="shot shot--lead">
-          <img src="frames/desktop/frame-0016.webp" alt="Sound waves rippling inward across a dark field" loading="lazy" width="1920" height="1080">
-          <figcaption class="micro"><span>A — Sound before notation</span><span>m. 016</span></figcaption>
+          <img src="frames/desktop/frame-0051.webp" alt="Sound waves rippling inward across a dark field" loading="lazy" width="1280" height="720">
+          <figcaption class="micro"><span>A — Sound before notation</span><span>m. 051</span></figcaption>
         </figure>
         <figure class="shot shot--top">
-          <img src="frames/desktop/frame-0059.webp" alt="Particles swirling into a vortex at the centre of the frame" loading="lazy" width="1920" height="1080">
-          <figcaption class="micro"><span>C — Gathering</span><span>m. 059</span></figcaption>
+          <img src="frames/desktop/frame-0189.webp" alt="Particles swirling into a vortex at the centre of the frame" loading="lazy" width="1280" height="720">
+          <figcaption class="micro"><span>C — Gathering</span><span>m. 189</span></figcaption>
         </figure>
         <figure class="shot shot--low">
-          <img src="frames/desktop/frame-0086.webp" alt="A glowing treble clef outline resolving out of light" loading="lazy" width="1920" height="1080">
-          <figcaption class="micro"><span>D — The clef resolves</span><span>m. 086</span></figcaption>
+          <img src="frames/desktop/frame-0276.webp" alt="A glowing treble clef outline resolving out of light" loading="lazy" width="1280" height="720">
+          <figcaption class="micro"><span>D — The clef resolves</span><span>m. 276</span></figcaption>
         </figure>
         <figure class="shot shot--end">
-          <img src="frames/desktop/frame-0139.webp" alt="The finished glass treble clef turning slowly" loading="lazy" width="1920" height="1080">
-          <figcaption class="micro"><span>F — Legible at last</span><span>m. 139</span></figcaption>
+          <img src="frames/desktop/frame-0446.webp" alt="The finished glass treble clef turning slowly" loading="lazy" width="1280" height="720">
+          <figcaption class="micro"><span>F — Legible at last</span><span>m. 446</span></figcaption>
         </figure>
       </div>
 
@@ -898,7 +898,7 @@
   </main>
 
   <footer class="site-footer micro">
-    <p>Solfai — movable-do solfège from sheet music. Film sequence: 110 frames, 10.04 seconds.</p>
+    <p>Solfai — movable-do solfège from sheet music. Film sequence: 481 frames, 10.04 seconds.</p>
     <a href="https://solfai-v2.onrender.com">Solfai ↗</a>
   </footer>
 
@@ -906,7 +906,7 @@
     (() => {
       "use strict";
 
-      const FRAME_COUNT = 150;
+      const FRAME_COUNT = 481;
       const FRAME_PAD = 4;
       // Gentler dwell than the starter default: the original DWELL_PEAK/WIDTH
       // (2.75 / .038) decelerated hard enough near each chapter to read as

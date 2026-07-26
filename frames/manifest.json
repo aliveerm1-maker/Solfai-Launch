@@ -1,34 +1,38 @@
 {
   "source": {
     "filename": "glass-clef-hero-graded.mp4",
-    "duration": 10.084,
+    "duration": 10.08,
     "resolution": "1920x1080",
-    "fps": 24.0,
-    "codec": "h264",
-    "origin": "Higgsfield Cinema Studio 3.0, end-frame bound to the glass treble clef reference",
-    "post": "Colour graded colder and darker toward the reference; speed-ramped through the edge-on rotation at ~7.0s (1.5x slow-in, 2.5x through, length preserved). Master: glass-clef-hero.mp4"
+    "native_fps": 24,
+    "native_frames": 241
   },
   "frames": {
-    "target_count": 150,
+    "target_count": 481,
     "format": "webp",
-    "quality": 68,
     "naming_pattern": "frame-{NNNN}.webp"
   },
   "desktop": {
-    "resolution": "1920x1080",
-    "actual_count": 150,
-    "total_mb": 5.6,
-    "avg_frame_kb": 38
+    "resolution": "1280x720",
+    "actual_count": 481,
+    "quality": 54,
+    "total_mb": 8.83
   },
   "mobile": {
-    "resolution": "960x540",
-    "actual_count": 150,
-    "total_mb": 2.36,
-    "avg_frame_kb": 16
+    "resolution": "640x360",
+    "actual_count": 481,
+    "quality": 46,
+    "total_mb": 3.16
   },
-  "recommended_scroll_height": "680vh",
+  "recommended_scroll_height": "520vh",
   "mobile_scroll_height": "600vh",
-  "chapter_centers": [0.045, 0.2, 0.38, 0.565, 0.72, 0.925],
+  "chapter_centers": [
+    0.045,
+    0.2,
+    0.38,
+    0.565,
+    0.72,
+    0.925
+  ],
   "engine_tuning": {
     "note": "Raised from the starter defaults after the initial 110-frame/DWELL_PEAK=2.75 build read as sticky/choppy on scroll.",
     "frame_count": "110 -> 150",
@@ -38,5 +42,10 @@
     "loader_batch_size": "8 -> 16",
     "priority_load": "tick() now force-loads the exact target frame each tick if unloaded, jumping it ahead of the batch queue"
   },
-  "created": "2026-07-26T09:10:00"
+  "created": "2026-07-26T09:10:00",
+  "interpolated": {
+    "to_fps": 48,
+    "method": "ffmpeg minterpolate mci/aobmc/vsbmc"
+  },
+  "updated": "2026-07-26"
 }

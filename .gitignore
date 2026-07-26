@@ -1,4 +1,4 @@
-# Single-file build produced for artifact previews — regenerate, don't commit
+# Single-file build produced for artifact previews - regenerate, don't commit
 preview.html
 
 node_modules/
