@@ -171,7 +171,7 @@
 
     /* ---------- Stage ---------- */
 
-    .sequence { position: relative; height: 520vh; background: var(--ink); }
+    .sequence { position: relative; height: 420vh; background: var(--ink); }
 
     .stage {
       position: sticky;
@@ -191,10 +191,29 @@
       height: 100%;
     }
 
+    /* Bloom peaks at the beat where the particles harden into glass, so the
+       formation actually lands instead of just arriving. Screen blend keeps it
+       additive over the film; JS drives --bloom from scroll progress. */
+    .stage__bloom {
+      position: absolute;
+      inset: -10%;
+      z-index: 1;
+      background: radial-gradient(
+        ellipse 42% 58% at 50% 48%,
+        rgba(255, 244, 224, .92) 0%,
+        rgba(255, 214, 150, .40) 34%,
+        rgba(255, 190, 120, 0) 68%
+      );
+      mix-blend-mode: screen;
+      opacity: var(--bloom, 0);
+      pointer-events: none;
+      will-change: opacity;
+    }
+
     .stage__scrim {
       position: absolute;
       inset: 0;
-      z-index: 1;
+      z-index: 2;
       background:
         linear-gradient(90deg, rgba(10, 7, 5, .74) 0%, rgba(10, 7, 5, .18) 34%, transparent 60%),
         linear-gradient(0deg, rgba(10, 7, 5, .76) 0%, transparent 34%);
@@ -208,7 +227,7 @@
     .stage__staff {
       position: absolute;
       inset: 0;
-      z-index: 2;
+      z-index: 3;
       pointer-events: none;
       mask-image: linear-gradient(90deg, black 0%, black 22%, transparent 38%, transparent 62%, black 78%, black 100%);
       -webkit-mask-image: linear-gradient(90deg, black 0%, black 22%, transparent 38%, transparent 62%, black 78%, black 100%);
@@ -623,7 +642,7 @@
 
       .site-header { grid-template-columns: 1fr auto; min-height: 58px; }
       .site-header__center { display: none; }
-      .sequence { height: 440vh; }
+      .sequence { height: 360vh; }
 
       .stage__scrim {
         background:
@@ -751,7 +770,7 @@
   <div class="loader" id="loader" aria-label="Loading the image sequence">
     <div class="loader__mark">
       <p class="loader__number" aria-hidden="true">do</p>
-      <div class="loader__meta">Solfai<br>Film sequence<br>481 frames</div>
+      <div class="loader__meta">Solfai<br>Film sequence<br>957 frames</div>
     </div>
     <div class="loader__foot">
       <span class="micro" id="loader-label">Tuning</span>
@@ -776,6 +795,7 @@
     <section class="sequence" id="sequence" aria-label="Scroll-controlled film: a treble clef forming from sound">
       <div class="stage" id="stage">
         <canvas id="film-canvas" role="img" aria-label="Sound waves converge, break into particles, and assemble into a glass treble clef as the page scrolls"></canvas>
+        <div class="stage__bloom" aria-hidden="true"></div>
         <div class="stage__scrim" aria-hidden="true"></div>
         <div class="stage__staff" aria-hidden="true">
           <span></span><span></span><span></span><span></span><span></span>
@@ -870,20 +890,20 @@
 
       <div class="contact-sheet">
         <figure class="shot shot--lead">
-          <img src="frames/desktop/frame-0051.webp" alt="Sound waves rippling inward across a dark field" loading="lazy" width="1280" height="720">
-          <figcaption class="micro"><span>A — Sound before notation</span><span>m. 051</span></figcaption>
+          <img src="frames/desktop/frame-0101.webp" alt="Sound waves rippling inward across a dark field" loading="lazy" width="1024" height="576">
+          <figcaption class="micro"><span>A — Sound before notation</span><span>m. 101</span></figcaption>
         </figure>
         <figure class="shot shot--top">
-          <img src="frames/desktop/frame-0189.webp" alt="Particles swirling into a vortex at the centre of the frame" loading="lazy" width="1280" height="720">
-          <figcaption class="micro"><span>C — Gathering</span><span>m. 189</span></figcaption>
+          <img src="frames/desktop/frame-0376.webp" alt="Particles swirling into a vortex at the centre of the frame" loading="lazy" width="1024" height="576">
+          <figcaption class="micro"><span>C — Gathering</span><span>m. 376</span></figcaption>
         </figure>
         <figure class="shot shot--low">
-          <img src="frames/desktop/frame-0276.webp" alt="A glowing treble clef outline resolving out of light" loading="lazy" width="1280" height="720">
-          <figcaption class="micro"><span>D — The clef resolves</span><span>m. 276</span></figcaption>
+          <img src="frames/desktop/frame-0549.webp" alt="A glowing treble clef outline resolving out of light" loading="lazy" width="1024" height="576">
+          <figcaption class="micro"><span>D — The clef resolves</span><span>m. 549</span></figcaption>
         </figure>
         <figure class="shot shot--end">
-          <img src="frames/desktop/frame-0446.webp" alt="The finished glass treble clef turning slowly" loading="lazy" width="1280" height="720">
-          <figcaption class="micro"><span>F — Legible at last</span><span>m. 446</span></figcaption>
+          <img src="frames/desktop/frame-0887.webp" alt="The finished glass treble clef turning slowly" loading="lazy" width="1024" height="576">
+          <figcaption class="micro"><span>F — Legible at last</span><span>m. 887</span></figcaption>
         </figure>
       </div>
 
@@ -898,7 +918,7 @@
   </main>
 
   <footer class="site-footer micro">
-    <p>Solfai — movable-do solfège from sheet music. Film sequence: 481 frames, 10.04 seconds.</p>
+    <p>Solfai — movable-do solfège from sheet music. Film sequence: 957 frames, 10.04 seconds.</p>
     <a href="https://solfai-v2.onrender.com">Solfai ↗</a>
   </footer>
 
@@ -906,7 +926,7 @@
     (() => {
       "use strict";
 
-      const FRAME_COUNT = 481;
+      const FRAME_COUNT = 957;
       const FRAME_PAD = 4;
       // Gentler dwell than the starter default: the original DWELL_PEAK/WIDTH
       // (2.75 / .038) decelerated hard enough near each chapter to read as
@@ -1066,9 +1086,24 @@
         sequenceDistance = Math.max(1, rect.height - window.innerHeight);
       }
 
+      // Slow cinematic push-in across the sequence. The film starts fractionally
+      // oversized and settles to exact cover, which reads as a camera easing in
+      // rather than a flat image swap.
+      const PUSH_START = 1.075;
+      const PUSH_END = 1.0;
+      let pushScale = PUSH_START;
+      let lastPush = -1;
+
+      function easeOutCubic(t) {
+        const c = t < 0 ? 0 : t > 1 ? 1 : t;
+        return 1 - Math.pow(1 - c, 3);
+      }
+
       function drawFrame(index) {
         const resolved = nearestLoaded(Math.max(0, Math.min(FRAME_COUNT - 1, index)));
-        if (resolved < 0 || resolved === lastDrawn) return;
+        if (resolved < 0) return;
+        // Redraw when the frame changes OR the push has moved enough to see.
+        if (resolved === lastDrawn && Math.abs(pushScale - lastPush) < 0.0015) return;
         const image = activeStore.images[resolved];
         if (!image || !image.naturalWidth) return;
 
@@ -1080,13 +1115,13 @@
         let scale, drawWidth, drawHeight, x, y;
 
         if (useMobileFrames) {
-          scale = width / image.naturalWidth;
-          drawWidth = width;
+          scale = (width / image.naturalWidth) * pushScale;
+          drawWidth = image.naturalWidth * scale;
           drawHeight = image.naturalHeight * scale;
-          x = 0;
+          x = (width - drawWidth) / 2;
           y = height * 0.36 - drawHeight / 2;
         } else {
-          scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+          scale = Math.max(width / image.naturalWidth, height / image.naturalHeight) * pushScale;
           drawWidth = image.naturalWidth * scale;
           drawHeight = image.naturalHeight * scale;
           x = (width - drawWidth) / 2;
@@ -1095,6 +1130,7 @@
 
         ctx.drawImage(image, x, y, drawWidth, drawHeight);
         lastDrawn = resolved;
+        lastPush = pushScale;
       }
 
       const rawAtEffective = new Float64Array(LUT_SIZE + 1);
@@ -1188,6 +1224,14 @@
 
       let lastPrioritized = -1;
 
+      // The clef finishes hardening around here in the film; the bloom is a
+      // narrow gaussian on that beat so the formation lands rather than just
+      // arriving. Widen SIGMA to soften, raise PEAK to brighten.
+      const BLOOM_CENTRE = 0.635;
+      const BLOOM_SIGMA = 0.055;
+      const BLOOM_PEAK = 0.62;
+      let lastBloom = -1;
+
       function tick() {
         if (!pageVisible) return;
         const raw = rawScrollProgress();
@@ -1195,6 +1239,15 @@
         targetFrame = Math.round(effective * (FRAME_COUNT - 1));
         currentFrame += (targetFrame - currentFrame) * lerp;
         const frame = Math.round(currentFrame);
+
+        pushScale = PUSH_START + (PUSH_END - PUSH_START) * easeOutCubic(effective);
+        const d = (effective - BLOOM_CENTRE) / BLOOM_SIGMA;
+        const bloom = motionMode === "reduced" ? 0 : BLOOM_PEAK * Math.exp(-0.5 * d * d);
+        if (Math.abs(bloom - lastBloom) > 0.004) {
+          lastBloom = bloom;
+          stage.style.setProperty("--bloom", bloom.toFixed(3));
+        }
+
         drawFrame(frame);
         updateChapters(effective);
         updateInterface(raw, effective, frame);
@@ -1248,9 +1301,27 @@
         dismissLoader();
         tick();
 
-        const remaining = Array.from({ length: FRAME_COUNT }, (_, index) => index)
-          .filter((index) => !critical.includes(index));
-        loadInBatches(remaining);
+        loadInBatches(progressiveOrder(FRAME_COUNT, critical), 12);
+      }
+
+      // Loading 0,1,2,...N in order means a fast scroll outruns the loader and
+      // lands on nothing, so nearestLoaded() snaps to a distant frame — that
+      // pop is what reads as choppiness during warm-up. Instead sweep the whole
+      // timeline coarsely (every 16th frame), then refine 8, 4, 2, 1. Coverage
+      // is complete almost immediately, so an unwarmed scroll degrades to a
+      // lower frame rate rather than stalling.
+      function progressiveOrder(count, already) {
+        const order = [];
+        const seen = new Uint8Array(count);
+        for (const index of already) {
+          if (index >= 0 && index < count) seen[index] = 1;
+        }
+        for (let stride = 16; stride >= 1; stride >>= 1) {
+          for (let index = 0; index < count; index += stride) {
+            if (!seen[index]) { seen[index] = 1; order.push(index); }
+          }
+        }
+        return order;
       }
 
       async function swapFrameSet(event) {
