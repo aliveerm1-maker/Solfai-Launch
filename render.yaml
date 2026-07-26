@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: solfai-launch
+    runtime: static
+    repo: https://github.com/aliveerm1-maker/Solfai-Launch
+    branch: main
+    buildCommand: ""
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: false
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=3600
+      - path: /frames/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+    routes:
+      - type: rewrite
+        source: /
+        destination: /index.html
