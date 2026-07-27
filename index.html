@@ -194,10 +194,21 @@
     /* Bloom peaks at the beat where the particles harden into glass, so the
        formation actually lands instead of just arriving. Screen blend keeps it
        additive over the film; JS drives --bloom from scroll progress. */
+    /* Effects layer: embers and note motes drifting over the film. Separate
+       canvas so it can animate every frame without redrawing the film. */
+    #fx-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
     .stage__bloom {
       position: absolute;
       inset: -10%;
-      z-index: 1;
+      z-index: 2;
       background: radial-gradient(
         ellipse 42% 58% at 50% 48%,
         rgba(255, 244, 224, .92) 0%,
@@ -213,7 +224,7 @@
     .stage__scrim {
       position: absolute;
       inset: 0;
-      z-index: 2;
+      z-index: 3;
       background:
         linear-gradient(90deg, rgba(10, 7, 5, .74) 0%, rgba(10, 7, 5, .18) 34%, transparent 60%),
         linear-gradient(0deg, rgba(10, 7, 5, .76) 0%, transparent 34%);
@@ -227,7 +238,7 @@
     .stage__staff {
       position: absolute;
       inset: 0;
-      z-index: 3;
+      z-index: 4;
       pointer-events: none;
       mask-image: linear-gradient(90deg, black 0%, black 22%, transparent 38%, transparent 62%, black 78%, black 100%);
       -webkit-mask-image: linear-gradient(90deg, black 0%, black 22%, transparent 38%, transparent 62%, black 78%, black 100%);
@@ -260,7 +271,7 @@
 
     /* ---------- Chapters ---------- */
 
-    .chapters { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+    .chapters { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
 
     .chapter {
       position: absolute;
@@ -806,6 +817,7 @@
     <section class="sequence" id="sequence" aria-label="Scroll-controlled film: a treble clef forming from sound">
       <div class="stage" id="stage">
         <canvas id="film-canvas" role="img" aria-label="Sound waves converge, break into particles, and assemble into a glass treble clef as the page scrolls"></canvas>
+        <canvas id="fx-canvas" aria-hidden="true"></canvas>
         <div class="stage__bloom" aria-hidden="true"></div>
         <div class="stage__scrim" aria-hidden="true"></div>
         <div class="stage__staff" aria-hidden="true">
@@ -1089,6 +1101,7 @@
           canvas.height = height;
           lastDrawn = -1;
         }
+        resizeFx();
       }
 
       function updateSequenceMetrics() {
@@ -1100,15 +1113,43 @@
       // Camera move across the sequence: a strong push-in plus a slow vertical
       // drift, so the film reads as a moving shot rather than a still that
       // swaps images.
-      const PUSH_START = 1.14;
-      const PUSH_END = 1.0;
-      const DRIFT = 0.022;           // fraction of stage height travelled
-      let pushScale = PUSH_START;
+      // Camera keyframes, one per beat of the film, interpolated with a smooth
+      // ease. A single linear push read as static; giving each chapter its own
+      // framing makes the camera feel choreographed to the footage instead.
+      // scale = zoom, x/y = pan as a fraction of stage size.
+      const SHOTS = [
+        { at: 0.00, scale: 1.15, x: 0.000, y: -0.014 },  // wide on the waveform
+        { at: 0.22, scale: 1.10, x: 0.016, y: -0.006 },  // ease right as it gathers
+        { at: 0.42, scale: 1.13, x: -0.014, y: 0.004 },  // press back in on the vortex
+        { at: 0.63, scale: 1.04, x: 0.000, y: 0.010 },   // open out as the clef forms
+        { at: 0.80, scale: 1.07, x: -0.010, y: 0.004 },  // drift across the glass
+        { at: 1.00, scale: 1.00, x: 0.000, y: -0.004 }   // settle for the CTA
+      ];
+
+      function cameraAt(p) {
+        let i = 0;
+        while (i < SHOTS.length - 2 && p > SHOTS[i + 1].at) i += 1;
+        const a = SHOTS[i];
+        const b = SHOTS[i + 1];
+        const span = b.at - a.at || 1;
+        const t = smoothstep(Math.max(0, Math.min(1, (p - a.at) / span)));
+        return {
+          scale: a.scale + (b.scale - a.scale) * t,
+          x: a.x + (b.x - a.x) * t,
+          y: a.y + (b.y - a.y) * t
+        };
+      }
+
+      function smoothstep(t) { return t * t * (3 - 2 * t); }
+
+      let pushScale = 1.15;
+      let panX = 0;
       let driftY = 0;
       let trail = 0;                 // velocity-driven motion trail, 0..TRAIL_MAX
       const TRAIL_MAX = 0.34;
       let lastPush = -1;
       let lastDrift = -1;
+      let lastPan = -1;
 
       function easeOutCubic(t) {
         const c = t < 0 ? 0 : t > 1 ? 1 : t;
@@ -1121,7 +1162,8 @@
         // Redraw when the frame changes, when the camera has moved enough to
         // see, or while a trail is decaying (it must fade even when parked).
         const cameraMoved = Math.abs(pushScale - lastPush) > 0.0012 ||
-                            Math.abs(driftY - lastDrift) > 0.0012;
+                            Math.abs(driftY - lastDrift) > 0.0012 ||
+                            Math.abs(panX - lastPan) > 0.0012;
         if (resolved === lastDrawn && !cameraMoved && trail <= 0.004) return;
         const image = activeStore.images[resolved];
         if (!image || !image.naturalWidth) return;
@@ -1152,12 +1194,14 @@
           scale = fit * pushScale;
           drawWidth = image.naturalWidth * scale;
           drawHeight = image.naturalHeight * scale;
-          x = (width - drawWidth) / 2;
-          // Never let the drift push the subject off frame: clamp it to
-          // whatever vertical slack the fit actually left.
-          const slack = Math.max(0, (height - drawHeight) / 2);
-          const offset = Math.max(-slack, Math.min(slack, driftY * height));
-          y = (height - drawHeight) / 2 + offset;
+          // Never let the camera move push the subject off frame: clamp both
+          // axes to whatever slack the fit actually left.
+          const slackY = Math.max(0, (height - drawHeight) / 2);
+          const slackX = Math.max(0, (width - drawWidth) / 2);
+          const offY = Math.max(-slackY, Math.min(slackY, driftY * height));
+          const offX = Math.max(-slackX, Math.min(slackX, panX * width));
+          x = (width - drawWidth) / 2 + offX;
+          y = (height - drawHeight) / 2 + offY;
         }
 
         ctx.drawImage(image, x, y, drawWidth, drawHeight);
@@ -1182,6 +1226,69 @@
         lastDrawn = resolved;
         lastPush = pushScale;
         lastDrift = driftY;
+        lastPan = panX;
+      }
+
+      // ---- Effects layer -----------------------------------------------------
+      // Embers and note motes drifting over the film. Its own canvas, so it can
+      // animate every frame without forcing a redraw of the film underneath.
+      const fxCanvas = document.getElementById("fx-canvas");
+      const fxCtx = fxCanvas.getContext("2d");
+      const EMBERS = [];
+      for (let i = 0; i < 76; i += 1) {
+        EMBERS.push({
+          x: Math.random(),
+          y: Math.random(),
+          r: Math.random() * 1.9 + 0.6,
+          speed: Math.random() * 0.017 + 0.006,
+          sway: Math.random() * 0.022 + 0.006,
+          phase: Math.random() * Math.PI * 2,
+          warm: Math.random() > 0.24
+        });
+      }
+
+      function resizeFx() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const w = Math.round(stage.clientWidth * dpr);
+        const h = Math.round(stage.clientHeight * dpr);
+        if (fxCanvas.width !== w || fxCanvas.height !== h) {
+          fxCanvas.width = w;
+          fxCanvas.height = h;
+        }
+      }
+
+      function drawFx(now, effective, drive) {
+        const w = fxCanvas.width;
+        const h = fxCanvas.height;
+        fxCtx.clearRect(0, 0, w, h);
+        if (motionMode === "reduced") return;
+
+        // Density tracks the film's own beats: sparse under the opening
+        // waveform, densest through the particle vortex, settling once the
+        // clef is solid glass.
+        const g = (effective - 0.42) / 0.26;
+        const density = 0.22 + 0.78 * Math.exp(-0.5 * g * g);
+        const t = now * 0.001;
+        const streak = 1 + drive * 5.5;
+
+        fxCtx.globalCompositeOperation = "lighter";
+        for (let i = 0; i < EMBERS.length; i += 1) {
+          const p = EMBERS[i];
+          let y = p.y - t * p.speed;
+          y -= Math.floor(y);
+          let x = p.x + Math.sin(t * 0.5 + p.phase) * p.sway;
+          x -= Math.floor(x);
+          const twinkle = 0.42 + 0.58 * Math.sin(t * 1.7 + p.phase);
+          const a = 0.5 * density * twinkle;
+          if (a <= 0.012) continue;
+          fxCtx.fillStyle = p.warm
+            ? "rgba(244, 205, 140, " + a.toFixed(3) + ")"
+            : "rgba(188, 214, 242, " + a.toFixed(3) + ")";
+          fxCtx.beginPath();
+          fxCtx.ellipse(x * w, y * h, p.r, p.r * streak, 0, 0, Math.PI * 2);
+          fxCtx.fill();
+        }
+        fxCtx.globalCompositeOperation = "source-over";
       }
 
       const rawAtEffective = new Float64Array(LUT_SIZE + 1);
@@ -1303,9 +1410,10 @@
         const full = motionMode !== "reduced";
         const drive = Math.min(1, velocity * 160);
 
-        pushScale = PUSH_START + (PUSH_END - PUSH_START) * easeOutCubic(effective);
-        // Vertical drift: a slow crane down across the sequence.
-        driftY = full ? (effective - 0.5) * DRIFT * 2 : 0;
+        const shot = cameraAt(effective);
+        pushScale = shot.scale;
+        driftY = full ? shot.y : 0;
+        panX = full ? shot.x : 0;
         // Motion blur only while actually moving; decays back to a clean frame.
         trail = full ? TRAIL_MAX * drive : 0;
 
@@ -1325,6 +1433,7 @@
         }
 
         drawFrame(frame);
+        drawFx(performance.now(), effective, drive);
         updateChapters(effective);
         updateInterface(raw, effective, frame);
 

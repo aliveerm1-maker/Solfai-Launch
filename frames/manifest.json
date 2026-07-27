@@ -52,14 +52,19 @@
   "denoise": "hqdn3d 2:1:3:3 (raises WebP efficiency without losing particle detail)",
   "measured": {
     "fast_scroll_effective_fps": 59.8,
-    "slow_scroll_effective_fps": 50,
     "raf_median_fps": 59.9,
     "long_tasks": 0
   },
   "framing": "contain with 0.97 slack (cover cropped the clef on short viewports); side bars feathered",
   "camera": {
-    "push_in": "1.14 -> 1.00 easeOutCubic",
-    "vertical_drift": "0.022 of height, clamped to fit slack",
+    "keyframed": "6 shots interpolated with smoothstep, one per beat",
+    "pan_and_zoom": "clamped to fit slack so the clef never crops",
     "motion_trail": "velocity driven, max 0.34"
+  },
+  "effects_layer": {
+    "canvas": "#fx-canvas",
+    "embers": 76,
+    "density": "gaussian peak at 0.42 progress, tracks the vortex beat",
+    "velocity_streak": true
   }
 }
