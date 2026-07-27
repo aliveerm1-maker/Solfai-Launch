@@ -12,16 +12,16 @@
     "naming_pattern": "frame-{NNNN}.webp"
   },
   "desktop": {
-    "resolution": "1024x576",
+    "resolution": "1280x720",
     "actual_count": 957,
-    "quality": 30,
-    "total_mb": 11.25
+    "quality": 26,
+    "total_mb": 14.14
   },
   "mobile": {
-    "resolution": "576x324",
+    "resolution": "640x360",
     "actual_count": 957,
-    "quality": 38,
-    "total_mb": 5.19
+    "quality": 34,
+    "total_mb": 5.8
   },
   "recommended_scroll_height": "420vh",
   "mobile_scroll_height": "600vh",
@@ -47,13 +47,19 @@
     "to_fps": 96,
     "method": "ffmpeg minterpolate mci/aobmc/vsbmc"
   },
-  "updated": "2026-07-26",
+  "updated": "2026-07-27",
   "grade": "eq contrast 1.24 / saturation 0.55, cool colorbalance, shadow-crush curves",
   "denoise": "hqdn3d 2:1:3:3 (raises WebP efficiency without losing particle detail)",
   "measured": {
-    "fast_scroll_effective_fps": 60,
-    "slow_scroll_effective_fps": 49.5,
+    "fast_scroll_effective_fps": 59.8,
+    "slow_scroll_effective_fps": 50,
     "raf_median_fps": 59.9,
     "long_tasks": 0
+  },
+  "framing": "contain with 0.97 slack (cover cropped the clef on short viewports); side bars feathered",
+  "camera": {
+    "push_in": "1.14 -> 1.00 easeOutCubic",
+    "vertical_drift": "0.022 of height, clamped to fit slack",
+    "motion_trail": "velocity driven, max 0.34"
   }
 }

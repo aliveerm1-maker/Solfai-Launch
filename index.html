@@ -233,12 +233,23 @@
       -webkit-mask-image: linear-gradient(90deg, black 0%, black 22%, transparent 38%, transparent 62%, black 78%, black 100%);
     }
 
+    /* Staff lines pick up scroll speed: they brighten and stretch slightly, so
+       moving fast feels like the page is being played rather than dragged.
+       JS writes --speed (0..1) from smoothed scroll velocity. */
     .stage__staff span {
       position: absolute;
       left: 0;
       width: 100%;
       height: 1px;
+      background: rgba(230, 192, 131, calc(.26 + .46 * var(--speed, 0)));
+      transform: scaleX(calc(1 + .06 * var(--speed, 0)));
+      box-shadow: 0 0 calc(9px * var(--speed, 0)) rgba(230, 192, 131, calc(.5 * var(--speed, 0)));
+    }
+
+    :root[data-motion="reduced"] .stage__staff span {
       background: rgba(230, 192, 131, .26);
+      transform: none;
+      box-shadow: none;
     }
 
     .stage__staff span:nth-child(1) { top: 45.0%; }
@@ -1086,13 +1097,18 @@
         sequenceDistance = Math.max(1, rect.height - window.innerHeight);
       }
 
-      // Slow cinematic push-in across the sequence. The film starts fractionally
-      // oversized and settles to exact cover, which reads as a camera easing in
-      // rather than a flat image swap.
-      const PUSH_START = 1.075;
+      // Camera move across the sequence: a strong push-in plus a slow vertical
+      // drift, so the film reads as a moving shot rather than a still that
+      // swaps images.
+      const PUSH_START = 1.14;
       const PUSH_END = 1.0;
+      const DRIFT = 0.022;           // fraction of stage height travelled
       let pushScale = PUSH_START;
+      let driftY = 0;
+      let trail = 0;                 // velocity-driven motion trail, 0..TRAIL_MAX
+      const TRAIL_MAX = 0.34;
       let lastPush = -1;
+      let lastDrift = -1;
 
       function easeOutCubic(t) {
         const c = t < 0 ? 0 : t > 1 ? 1 : t;
@@ -1102,14 +1118,22 @@
       function drawFrame(index) {
         const resolved = nearestLoaded(Math.max(0, Math.min(FRAME_COUNT - 1, index)));
         if (resolved < 0) return;
-        // Redraw when the frame changes OR the push has moved enough to see.
-        if (resolved === lastDrawn && Math.abs(pushScale - lastPush) < 0.0015) return;
+        // Redraw when the frame changes, when the camera has moved enough to
+        // see, or while a trail is decaying (it must fade even when parked).
+        const cameraMoved = Math.abs(pushScale - lastPush) > 0.0012 ||
+                            Math.abs(driftY - lastDrift) > 0.0012;
+        if (resolved === lastDrawn && !cameraMoved && trail <= 0.004) return;
         const image = activeStore.images[resolved];
         if (!image || !image.naturalWidth) return;
 
         const width = canvas.width;
         const height = canvas.height;
-        ctx.fillStyle = "#0A0705";
+
+        // Clearing with partial alpha leaves a decaying ghost of the previous
+        // frame — real motion blur that only appears when scrolling fast.
+        ctx.fillStyle = trail > 0.004
+          ? "rgba(10, 7, 5, " + (1 - trail).toFixed(3) + ")"
+          : "#0A0705";
         ctx.fillRect(0, 0, width, height);
 
         let scale, drawWidth, drawHeight, x, y;
@@ -1119,18 +1143,45 @@
           drawWidth = image.naturalWidth * scale;
           drawHeight = image.naturalHeight * scale;
           x = (width - drawWidth) / 2;
-          y = height * 0.36 - drawHeight / 2;
+          y = height * 0.36 - drawHeight / 2 + driftY * height;
         } else {
-          scale = Math.max(width / image.naturalWidth, height / image.naturalHeight) * pushScale;
+          // Contain, not cover: the clef fills the frame vertically in the
+          // source, so cover-scaling on a short window crops its head and tail.
+          // The 0.97 leaves a sliver of slack for the drift to move into.
+          const fit = Math.min(width / image.naturalWidth, height / image.naturalHeight) * 0.97;
+          scale = fit * pushScale;
           drawWidth = image.naturalWidth * scale;
           drawHeight = image.naturalHeight * scale;
           x = (width - drawWidth) / 2;
-          y = (height - drawHeight) / 2;
+          // Never let the drift push the subject off frame: clamp it to
+          // whatever vertical slack the fit actually left.
+          const slack = Math.max(0, (height - drawHeight) / 2);
+          const offset = Math.max(-slack, Math.min(slack, driftY * height));
+          y = (height - drawHeight) / 2 + offset;
         }
 
         ctx.drawImage(image, x, y, drawWidth, drawHeight);
+
+        // Feather the film into the page where contain leaves side bars, so the
+        // letterbox edge never reads as a hard seam.
+        if (!useMobileFrames && drawWidth < width - 2) {
+          const feather = Math.max(48, Math.min(190, (width - drawWidth) * 0.55));
+          let g = ctx.createLinearGradient(x, 0, x + feather, 0);
+          g.addColorStop(0, "#0A0705");
+          g.addColorStop(1, "rgba(10, 7, 5, 0)");
+          ctx.fillStyle = g;
+          ctx.fillRect(x - 1, 0, feather + 1, height);
+
+          const right = x + drawWidth;
+          g = ctx.createLinearGradient(right, 0, right - feather, 0);
+          g.addColorStop(0, "#0A0705");
+          g.addColorStop(1, "rgba(10, 7, 5, 0)");
+          ctx.fillStyle = g;
+          ctx.fillRect(right - feather, 0, feather + 1, height);
+        }
         lastDrawn = resolved;
         lastPush = pushScale;
+        lastDrift = driftY;
       }
 
       const rawAtEffective = new Float64Array(LUT_SIZE + 1);
@@ -1232,6 +1283,10 @@
       const BLOOM_PEAK = 0.62;
       let lastBloom = -1;
 
+      let lastRaw = -1;
+      let velocity = 0;
+      let lastSpeedVar = -1;
+
       function tick() {
         if (!pageVisible) return;
         const raw = rawScrollProgress();
@@ -1240,12 +1295,33 @@
         currentFrame += (targetFrame - currentFrame) * lerp;
         const frame = Math.round(currentFrame);
 
+        // Smoothed scroll speed, as a fraction of the sequence per frame.
+        const delta = lastRaw < 0 ? 0 : Math.abs(raw - lastRaw);
+        lastRaw = raw;
+        velocity += (delta - velocity) * 0.18;
+
+        const full = motionMode !== "reduced";
+        const drive = Math.min(1, velocity * 160);
+
         pushScale = PUSH_START + (PUSH_END - PUSH_START) * easeOutCubic(effective);
+        // Vertical drift: a slow crane down across the sequence.
+        driftY = full ? (effective - 0.5) * DRIFT * 2 : 0;
+        // Motion blur only while actually moving; decays back to a clean frame.
+        trail = full ? TRAIL_MAX * drive : 0;
+
         const d = (effective - BLOOM_CENTRE) / BLOOM_SIGMA;
-        const bloom = motionMode === "reduced" ? 0 : BLOOM_PEAK * Math.exp(-0.5 * d * d);
+        // Bloom peaks on the formation beat, and scroll speed adds a little on
+        // top so fast movement feels energetic rather than just faster.
+        const bloom = full
+          ? Math.min(0.95, BLOOM_PEAK * Math.exp(-0.5 * d * d) + 0.16 * drive)
+          : 0;
         if (Math.abs(bloom - lastBloom) > 0.004) {
           lastBloom = bloom;
           stage.style.setProperty("--bloom", bloom.toFixed(3));
+        }
+        if (Math.abs(drive - lastSpeedVar) > 0.02) {
+          lastSpeedVar = drive;
+          stage.style.setProperty("--speed", drive.toFixed(3));
         }
 
         drawFrame(frame);
