@@ -458,8 +458,53 @@
       transition: color 250ms ease, background 250ms ease, border-color 250ms ease;
     }
 
-    .cta::after { content: "↗"; font-size: 16px; }
-    .cta:hover { background: var(--paper); border-color: var(--paper); color: var(--ink); }
+    /* The fill wipes in from the left like a rehearsal mark being drawn across
+       the bar, rather than a plain colour swap. */
+    .cta { position: relative; overflow: hidden; isolation: isolate; }
+
+    .cta::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: var(--paper);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 460ms var(--ease-out);
+    }
+
+    .cta > span { position: relative; transition: transform 460ms var(--ease-out); }
+
+    .cta::after {
+      content: "↗";
+      font-size: 16px;
+      transition: transform 420ms var(--ease-out);
+    }
+
+    .cta:hover, .cta:focus-visible { border-color: var(--paper); color: var(--ink); }
+    .cta:hover::before, .cta:focus-visible::before { transform: scaleX(1); }
+    .cta:hover > span, .cta:focus-visible > span { transform: translateX(3px); }
+    .cta:hover::after, .cta:focus-visible::after { transform: translate(5px, -5px); }
+    .cta:active { transform: translateY(1px); }
+
+    /* Footer link: the underline draws in from the left. */
+    .link-sweep > span { position: relative; }
+
+    .link-sweep > span::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -3px;
+      width: 100%;
+      height: 1px;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 420ms var(--ease-out);
+    }
+
+    .link-sweep:hover > span::after,
+    .link-sweep:focus-visible > span::after { transform: scaleX(1); transform-origin: left; }
 
     /* ---------- Signature device 1: the rehearsal rail ---------- */
 
@@ -642,7 +687,8 @@
       margin-top: 0;
     }
 
-    .cta--ink:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+    .cta--ink::before { background: var(--ink); }
+    .cta--ink:hover, .cta--ink:focus-visible { border-color: var(--ink); color: var(--paper); }
 
     .site-footer {
       display: grid;
@@ -752,6 +798,58 @@
     :root[data-motion="reduced"] .chapter__eyebrow::before { transform: scaleX(1); }
     :root[data-motion="reduced"] .scroll-cue::after { animation: none; opacity: .6; }
     :root[data-motion="reduced"] .shot:hover img { transform: none; }
+
+    /* Cursor: a note-head outline, the mark a singer pencils onto a score.
+       Fills and grows over anything interactive. Pointer-fine devices only,
+       and removed entirely under reduced motion. */
+    .cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 999;
+      width: 22px;
+      height: 22px;
+      margin: -11px 0 0 -11px;
+      border: 1px solid var(--brass);
+      border-radius: 50% 50% 48% 52% / 52% 48% 50% 50%;
+      background: transparent;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate3d(-100px, -100px, 0) rotate(-18deg);
+      transition: width 260ms var(--ease-out), height 260ms var(--ease-out),
+                  margin 260ms var(--ease-out), background 260ms ease,
+                  opacity 260ms ease, border-color 260ms ease;
+      will-change: transform;
+    }
+
+    .cursor.is-live { opacity: .85; }
+
+    .cursor.is-hot {
+      width: 44px;
+      height: 44px;
+      margin: -22px 0 0 -22px;
+      background: rgba(230, 192, 131, .22);
+      border-color: var(--paper);
+    }
+
+    @media (hover: none), (pointer: coarse) {
+      .cursor { display: none; }
+    }
+
+    :root[data-motion="reduced"] .cursor { display: none; }
+
+    /* Editorial section rises into place as it enters the viewport. */
+    .reveal-up {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+    }
+
+    .reveal-up.is-in { opacity: 1; transform: none; }
+    .reveal-up:nth-of-type(2) { transition-delay: 80ms; }
+    .reveal-up:nth-of-type(3) { transition-delay: 160ms; }
+
+    :root[data-motion="reduced"] .reveal-up { opacity: 1; transform: none; transition: none; }
 
     .motion-toggle {
       pointer-events: auto;
@@ -876,7 +974,7 @@
             <div class="chapter__copy">
               <p class="chapter__eyebrow micro">F — Try it</p>
               <h2 class="chapter__title reveal"><span>Bring your<br>next score</span></h2>
-              <a class="cta" href="https://solfai-v2.onrender.com" aria-label="Open Solfai and upload a score">Open Solfai</a>
+              <a class="cta" href="https://solfai-v2.onrender.com" aria-label="Open Solfai and upload a score"><span>Open Solfai</span></a>
             </div>
           </article>
         </div>
@@ -893,12 +991,12 @@
     </section>
 
     <section class="editorial" aria-labelledby="contact-title">
-      <div class="editorial__head">
+      <div class="editorial__head reveal-up">
         <h2 class="editorial__title" id="contact-title">Honest about where it stands.</h2>
         <p class="editorial__aside">Solfai reads sheet music two ways. One path is finished and exact. The other is the harder problem, and worth being straight about.</p>
       </div>
 
-      <div class="paths">
+      <div class="paths reveal-up">
         <div class="path">
           <span class="micro">Path one — MusicXML</span>
           <h3>Exact today</h3>
@@ -911,7 +1009,7 @@
         </div>
       </div>
 
-      <div class="contact-sheet">
+      <div class="contact-sheet reveal-up">
         <figure class="shot shot--lead">
           <img src="frames/desktop/frame-0120.webp" alt="A single point of light igniting in darkness" loading="lazy" width="1280" height="720">
           <figcaption class="micro"><span>A — First light</span><span>m. 120</span></figcaption>
@@ -930,19 +1028,21 @@
         </figure>
       </div>
 
-      <div class="editorial__note">
+      <div class="editorial__note reveal-up">
         <strong>Built at the intersection of two things I care about.</strong>
         <div>
           <p>Choir has been a real part of my life for four years. So has building things. Solfai came out of putting those together — the tool I wished existed, standing in rehearsal without a piano and not enough time.</p>
-          <a class="cta cta--ink" href="https://solfai-v2.onrender.com" aria-label="Open Solfai and upload a score">Upload a score</a>
+          <a class="cta cta--ink" href="https://solfai-v2.onrender.com" aria-label="Open Solfai and upload a score"><span>Upload a score</span></a>
         </div>
       </div>
     </section>
   </main>
 
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+
   <footer class="site-footer micro">
     <p>Solfai — movable-do solfège from sheet music. Film sequence: 957 frames, 13.27 seconds.</p>
-    <a href="https://solfai-v2.onrender.com">Solfai ↗</a>
+    <a class="link-sweep" href="https://solfai-v2.onrender.com"><span>Solfai</span> ↗</a>
   </footer>
 
   <script>
@@ -1522,6 +1622,61 @@
         const byDistance = Array.from({ length: FRAME_COUNT }, (_, index) => index)
           .sort((a, b) => Math.abs(a - frame) - Math.abs(b - frame));
         loadInBatches(byDistance, 16, activeStore);
+      }
+
+      // ---- Cursor -----------------------------------------------------------
+      // A note-head that trails the pointer slightly and fills over anything
+      // interactive. Pointer-fine only, and skipped entirely in reduced motion.
+      const cursorEl = document.getElementById("cursor");
+      const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+      if (finePointer && cursorEl) {
+        let cx = -100, cy = -100, tx = -100, ty = -100, cursorRaf = 0, live = false;
+
+        function cursorTick() {
+          cx += (tx - cx) * 0.20;
+          cy += (ty - cy) * 0.20;
+          const spin = -18 + (tx - cx) * 1.6;
+          cursorEl.style.transform =
+            "translate3d(" + cx.toFixed(1) + "px," + cy.toFixed(1) + "px,0) rotate(" + spin.toFixed(1) + "deg)";
+          cursorRaf = requestAnimationFrame(cursorTick);
+        }
+
+        window.addEventListener("pointermove", (e) => {
+          if (e.pointerType !== "mouse") return;
+          tx = e.clientX;
+          ty = e.clientY;
+          if (!live) {
+            live = true;
+            cx = tx; cy = ty;
+            cursorEl.classList.add("is-live");
+            cursorTick();
+          }
+          const hot = e.target instanceof Element &&
+            e.target.closest("a, button, .shot");
+          cursorEl.classList.toggle("is-hot", !!hot);
+        }, { passive: true });
+
+        window.addEventListener("pointerdown", () => cursorEl.classList.add("is-hot"));
+        window.addEventListener("pointerup", () => cursorEl.classList.remove("is-hot"));
+        document.addEventListener("mouseleave", () => cursorEl.classList.remove("is-live"));
+        document.addEventListener("mouseenter", () => { if (live) cursorEl.classList.add("is-live"); });
+      }
+
+      // ---- Editorial reveals -------------------------------------------------
+      const revealEls = Array.from(document.querySelectorAll(".reveal-up"));
+      if (revealEls.length && "IntersectionObserver" in window) {
+        const io = new IntersectionObserver((entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-in");
+              io.unobserve(entry.target);
+            }
+          }
+        }, { rootMargin: "0px 0px -12% 0px", threshold: 0.12 });
+        revealEls.forEach((el) => io.observe(el));
+      } else {
+        revealEls.forEach((el) => el.classList.add("is-in"));
       }
 
       window.addEventListener("resize", () => {
