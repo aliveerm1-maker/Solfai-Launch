@@ -40,7 +40,7 @@
   <link rel="preload" as="image" href="frames/desktop/frame-0001.webp" fetchpriority="high">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,100..900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,100..900&family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
       /* Sampled from the film: void brown, amber ground, brass rings, glass highlight */
@@ -53,8 +53,13 @@
       --alloy: #9C9088;
       --flag: #C4432B;
 
-      --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+      /* Headlines are monospace: this is an instrument readout, not a poster.
+         Even advance mirrors the even spacing of measures on a staff. */
+      --display: "JetBrains Mono", ui-monospace, "IBM Plex Mono", monospace;
       --data: "IBM Plex Mono", ui-monospace, monospace;
+      --body: "Archivo", system-ui, sans-serif;
+      /* Single accent, used only as a marker — never as a fill. */
+      --mark: #E8593A;
       --gutter: clamp(20px, 4.2vw, 72px);
       --ease-out: cubic-bezier(.22, 1, .36, 1);
       --line: rgba(242, 237, 228, .17);
@@ -183,14 +188,61 @@
 
     .site-header__brand {
       justify-self: start;
-      font-size: 13px;
-      font-weight: 720;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-family: var(--display);
+      font-size: 14px;
+      font-weight: 700;
       letter-spacing: -.02em;
       text-transform: uppercase;
+      text-decoration: none;
+      pointer-events: auto;
     }
 
-    .site-header__center { color: rgba(242, 237, 228, .72); }
-    .site-header__end { justify-self: end; text-align: right; color: rgba(242, 237, 228, .72); }
+    .site-header__mark {
+      font-family: "Segoe UI Symbol", "Noto Music", "Apple Symbols", serif;
+      font-size: 20px;
+      line-height: 0;
+      color: var(--mark);
+      transform: translateY(1px);
+    }
+
+    .site-header__nav {
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      pointer-events: auto;
+    }
+
+    /* Each link carries the accent square, the way a live channel is flagged. */
+    .site-header__nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--display);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: -.01em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: rgba(242, 237, 228, .74);
+      transition: color 200ms ease;
+    }
+
+    .site-header__nav a::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      background: var(--mark);
+      transition: transform 240ms var(--ease-out);
+    }
+
+    .site-header__nav a:hover, .site-header__nav a:focus-visible { color: var(--paper); }
+    .site-header__nav a:hover::before { transform: scale(1.5); }
+
+    @media (max-width: 780px) { .site-header__nav { display: none; } }
 
     /* ---------- Stage ---------- */
 
@@ -254,6 +306,60 @@
       opacity: var(--scrim-opacity, .74);
       transition: opacity 500ms ease;
       pointer-events: none;
+    }
+
+    /* Accent marker: a small square that flags a live readout. Used only to
+       mark, never to fill. */
+    .chapter__deck::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: .52em;
+      width: 6px;
+      height: 6px;
+      background: var(--mark);
+    }
+
+    /* HUD framing brackets. The stage is a monitored field, not a picture, so
+       it gets registration corners rather than a border. */
+    .stage__hud {
+      position: absolute;
+      inset: clamp(56px, 7vh, 92px) var(--gutter) clamp(70px, 9vh, 104px);
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    .stage__hud i {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      border: 1px solid rgba(242, 237, 228, .28);
+    }
+
+    .stage__hud i:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+    .stage__hud i:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+    .stage__hud i:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+    .stage__hud i:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+
+    /* Live marker on the right edge, pinned to the current measure. */
+    .stage__tick {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      width: 1px;
+      height: 120px;
+      margin-top: -60px;
+      background: linear-gradient(180deg, transparent, rgba(242, 237, 228, .5), transparent);
+    }
+
+    .stage__tick::after {
+      content: "";
+      position: absolute;
+      right: -2px;
+      top: calc(var(--frame-progress, 0) * 100%);
+      width: 5px;
+      height: 5px;
+      background: var(--mark);
     }
 
     /* Signature device 2: the page's staff lines continue the ones in the film.
@@ -377,7 +483,15 @@
     .reveal:nth-child(4) > span { transition-delay: 160ms; }
     .chapter.is-visible .reveal > span { transform: translateY(0); }
 
+    /* Monospace headline: uppercase, tight negative tracking, sized to read as
+       a readout rather than a display poster. */
     .chapter__title {
+      font-family: var(--display);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: -.02em !important;
+      line-height: 1.02 !important;
+      font-variation-settings: normal !important;
       margin: 0;
       font-size: clamp(44px, 6.2vw, 96px);
       font-weight: 760;
@@ -389,7 +503,12 @@
       text-shadow: 0 2px 30px rgba(10, 7, 5, .5);
     }
 
+    /* Body copy stays in the sans face and carries the accent marker, so the
+       eye reads mono = system, sans = human. */
     .chapter__deck {
+      font-family: var(--body);
+      position: relative;
+      padding-left: 18px;
       max-width: 32rem;
       margin: 26px 0 0;
       font-size: clamp(17px, 1.5vw, 23px);
@@ -884,8 +1003,14 @@
   </div>
 
   <header class="site-header" aria-label="Project information">
-    <div class="site-header__brand">Solfai</div>
-    <div class="site-header__center micro">Sheet music in, solfège out</div>
+    <a class="site-header__brand" href="#top">
+      <span class="site-header__mark" aria-hidden="true">&#x1D11E;</span>
+      <span>Solfai</span>
+    </a>
+    <nav class="site-header__nav" aria-label="Sections">
+      <a href="#contact-title">How it reads</a>
+      <a href="#story">Story</a>
+    </nav>
     <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">
       <span id="motion-label">Full motion</span>
     </button>
@@ -895,7 +1020,7 @@
     <p class="noscript-note">This page plays a 110-frame film as you scroll, which needs JavaScript. Solfai itself works without it.</p>
   </noscript>
 
-  <main>
+  <main id="top">
     <section class="sequence" id="sequence" aria-label="Scroll-controlled film: a treble clef forming from sound">
       <div class="stage" id="stage">
         <canvas id="film-canvas" role="img" aria-label="Sound waves converge, break into particles, and assemble into a glass treble clef as the page scrolls"></canvas>
@@ -904,6 +1029,10 @@
         <div class="stage__scrim" aria-hidden="true"></div>
         <div class="stage__staff" aria-hidden="true">
           <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="stage__hud" aria-hidden="true">
+          <i></i><i></i><i></i><i></i>
+          <span class="stage__tick"></span>
         </div>
 
         <div class="chapters" aria-live="off">
@@ -1012,10 +1141,12 @@
         </figure>
       </div>
 
-      <div class="editorial__note reveal-up">
-        <strong>Built at the intersection of two things I care about.</strong>
+      <div class="editorial__note reveal-up" id="story">
+        <strong>Not a school project. Not a résumé line.</strong>
         <div>
-          <p>Choir has been a real part of my life for four years. So has building things. Solfai came out of putting those together — the tool I wished existed, standing in rehearsal without a piano and not enough time.</p>
+          <p>Four years of Varsity Choir. Competitions, sectionals, the lot. And the whole time, the other thing I do is build software — take an idea and actually ship it.</p>
+          <p>Solfai is what happens when those two meet. I kept hitting the same wall: a page of notation in front of me, no piano to check pitches against, and a rehearsal deadline. The gap between what the score says and what I could actually sing was just time I didn't have.</p>
+          <p>So I built the tool I wanted. Not because anyone assigned it — because I needed it on a Tuesday night and it didn't exist.</p>
           <a class="cta cta--ink" href="https://solfai-v2.onrender.com" aria-label="Open Solfai and upload a score"><span>Upload a score</span></a>
         </div>
       </div>
