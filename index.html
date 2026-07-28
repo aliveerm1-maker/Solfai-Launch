@@ -14,7 +14,30 @@
   <meta name="theme-color" content="#0A0705">
   <meta name="description" content="Solfai reads sheet music and returns your key, your part, your starting pitch, and the measures most likely to trip you up — in movable-do solfège.">
   <title>Solfai — Sheet music in, solfège out</title>
-  <link rel="icon" href="data:,">
+
+  <!-- Sharing card. og:image must be absolute; swap the origin here if this
+       page moves off GitHub Pages. -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Solfai">
+  <meta property="og:title" content="Solfai — Sheet music in, solfège out">
+  <meta property="og:description" content="Upload a score and get your key, your part, your starting pitch, and the measures most likely to trip you up — all in movable-do solfège.">
+  <meta property="og:url" content="https://aliveerm1-maker.github.io/Solfai-Launch/">
+  <meta property="og:image" content="https://aliveerm1-maker.github.io/Solfai-Launch/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="A glass treble clef beside the word Solfai on a dark ground.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Solfai — Sheet music in, solfège out">
+  <meta name="twitter:description" content="Upload a score and get your key, your part, your starting pitch, and the measures most likely to trip you up — all in movable-do solfège.">
+  <meta name="twitter:image" content="https://aliveerm1-maker.github.io/Solfai-Launch/og.jpg">
+
+  <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="canonical" href="https://aliveerm1-maker.github.io/Solfai-Launch/">
+
+  <!-- The first frame decides how fast the page stops looking empty. -->
+  <link rel="preload" as="image" href="frames/desktop/frame-0001.webp" fetchpriority="high">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,100..900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -148,26 +171,97 @@
       position: fixed;
       inset: 0 0 auto;
       z-index: 90;
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      gap: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
       min-height: 70px;
-      padding: max(16px, env(safe-area-inset-top)) var(--gutter) 12px;
-      mix-blend-mode: difference;
+      padding: max(14px, env(safe-area-inset-top)) var(--gutter) 12px;
       pointer-events: none;
     }
 
-    .site-header__brand {
-      justify-self: start;
-      font-size: 13px;
-      font-weight: 720;
-      letter-spacing: -.02em;
-      text-transform: uppercase;
+    /* Floating nav pill. Glass over the film rather than a bar across it, so
+       the frame stays uninterrupted. */
+    .navpill {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 7px 7px 14px;
+      border-radius: 999px;
     }
 
-    .site-header__center { color: rgba(242, 237, 228, .72); }
-    .site-header__end { justify-self: end; text-align: right; color: rgba(242, 237, 228, .72); }
+    .navpill__brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding-right: 4px;
+      font-size: 13px;
+      font-weight: 720;
+      letter-spacing: -.015em;
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .navpill__mark {
+      font-family: "Segoe UI Symbol", "Noto Music", "Apple Symbols", "Symbola", serif;
+      font-size: 21px;
+      line-height: 0;
+      color: var(--brass);
+      transform: translateY(1px);
+    }
+
+    .navpill__sep {
+      width: 1px;
+      height: 18px;
+      margin: 0 4px;
+      background: rgba(242, 237, 228, .16);
+    }
+
+    .navpill__link {
+      padding: 7px 11px;
+      border-radius: 999px;
+      color: rgba(242, 237, 228, .68);
+      font-family: var(--data);
+      font-size: 10.5px;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color 200ms ease, background 200ms ease;
+    }
+
+    .navpill__link:hover, .navpill__link:focus-visible {
+      color: var(--paper);
+      background: rgba(242, 237, 228, .08);
+    }
+
+    .navpill__cta {
+      padding: 8px 15px;
+      border-radius: 999px;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--data);
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: transform 220ms var(--ease-out), box-shadow 220ms ease;
+    }
+
+    .navpill__cta:hover, .navpill__cta:focus-visible {
+      transform: scale(1.04);
+      box-shadow: 0 0 22px 3px rgba(242, 237, 228, .22);
+    }
+
+    .navpill__cta:active { transform: scale(.975); }
+
+    @media (max-width: 780px) {
+      .navpill__link, .navpill__sep { display: none; }
+      .navpill { gap: 5px; padding-left: 12px; }
+    }
 
     /* ---------- Stage ---------- */
 
@@ -394,6 +488,89 @@
     /* The deep pencil red is for rules and borders; text needs the lighter tint
        to clear AA against the amber footage. */
     .chapter__fact .flag { color: #E8836F; }
+
+    /* ---------- Hero actions and stats ---------- */
+
+    .hero-actions {
+      pointer-events: auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 24px;
+      border-radius: 999px;
+      font-family: var(--data);
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: transform 220ms var(--ease-out), box-shadow 260ms ease,
+                  background 220ms ease, color 220ms ease;
+    }
+
+    .btn::after {
+      content: "→";
+      font-size: 14px;
+      transition: transform 260ms var(--ease-out);
+    }
+
+    .btn:hover::after, .btn:focus-visible::after { transform: translateX(4px); }
+    .btn:active { transform: translateY(1px) scale(.985); }
+
+    .btn--solid { background: var(--paper); color: var(--ink); }
+
+    .btn--solid:hover, .btn--solid:focus-visible {
+      transform: scale(1.03);
+      box-shadow: 0 0 26px 4px rgba(242, 237, 228, .24);
+    }
+
+    .btn--glass { color: var(--paper); }
+
+    .btn--glass:hover, .btn--glass:focus-visible {
+      transform: scale(1.03);
+      box-shadow: inset 0 1px 1px rgba(242, 237, 228, .2),
+                  0 0 20px 2px rgba(230, 192, 131, .16);
+    }
+
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin: 34px 0 0;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      max-width: 30rem;
+    }
+
+    .hero-stats div { display: flex; align-items: baseline; gap: 10px; }
+
+    .hero-stats dt {
+      font-size: clamp(26px, 3.2vw, 40px);
+      font-weight: 760;
+      font-variation-settings: "wdth" 88;
+      letter-spacing: -.045em;
+      line-height: 1;
+      color: var(--paper);
+    }
+
+    .hero-stats dd {
+      margin: 0;
+      font-family: var(--data);
+      font-size: 9.5px;
+      line-height: 1.45;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--alloy);
+    }
 
     .chapter--hero { align-content: end; }
     .chapter--hero .chapter__copy { grid-column: 1 / 10; padding-bottom: 6vh; }
@@ -746,8 +923,13 @@
 
       .chapter--hero { align-content: end; }
       .chapter--hero .chapter__copy { padding-bottom: 2vh; }
-      .chapter--hero .chapter__title { font-size: clamp(76px, 27vw, 132px); }
+      .chapter--hero .chapter__title { font-size: clamp(64px, 22vw, 110px); }
       .chapter--hero .chapter__deck { margin-left: 0; max-width: 19rem; }
+
+      .hero-actions { gap: 10px; margin-top: 20px; }
+      .btn { padding: 12px 18px; font-size: 10.5px; }
+      .hero-stats { gap: 16px; margin-top: 20px; padding-top: 14px; }
+      .hero-stats dd { font-size: 8.5px; }
 
       .chapter--split .chapter__copy { display: block; }
       .chapter--split .split-end { text-align: left; }
@@ -851,6 +1033,27 @@
 
     :root[data-motion="reduced"] .reveal-up { opacity: 1; transform: none; transition: none; }
 
+    /* Glass surface. The gradient edge is done with padding-box/border-box
+       layering rather than a ::before, because the controls already use that
+       pseudo for their fill sweep and status dot. Tinted brass rather than
+       white so it reads as part of this page, not a borrowed component. */
+    .glass {
+      background:
+        linear-gradient(rgba(242, 237, 228, .012), rgba(242, 237, 228, .012)) padding-box,
+        linear-gradient(180deg,
+          rgba(230, 192, 131, .50) 0%,
+          rgba(230, 192, 131, .16) 22%,
+          rgba(230, 192, 131, 0) 44%,
+          rgba(230, 192, 131, 0) 56%,
+          rgba(230, 192, 131, .16) 78%,
+          rgba(230, 192, 131, .50) 100%) border-box;
+      border: 1.4px solid transparent;
+      background-blend-mode: luminosity;
+      backdrop-filter: blur(5px) saturate(1.1);
+      -webkit-backdrop-filter: blur(5px) saturate(1.1);
+      box-shadow: inset 0 1px 1px rgba(242, 237, 228, .10);
+    }
+
     .motion-toggle {
       pointer-events: auto;
       justify-self: end;
@@ -899,19 +1102,27 @@
     </div>
   </div>
 
-  <header class="site-header" aria-label="Project information">
-    <div class="site-header__brand">Solfai</div>
-    <div class="site-header__center micro">Sheet music in, solfège out</div>
-    <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">
-      <span id="motion-label">Full motion</span>
-    </button>
+  <header class="site-header" aria-label="Primary">
+    <nav class="navpill glass">
+      <a class="navpill__brand" href="#top">
+        <span class="navpill__mark" aria-hidden="true">&#x1D11E;</span>
+        <span>Solfai</span>
+      </a>
+      <span class="navpill__sep" aria-hidden="true"></span>
+      <a class="navpill__link" href="#contact-title">How it reads</a>
+      <a class="navpill__link" href="#story">Story</a>
+      <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">
+        <span id="motion-label">Full motion</span>
+      </button>
+      <a class="navpill__cta" href="https://solfai-v2.onrender.com">Open Solfai</a>
+    </nav>
   </header>
 
   <noscript>
     <p class="noscript-note">This page plays a 110-frame film as you scroll, which needs JavaScript. Solfai itself works without it.</p>
   </noscript>
 
-  <main>
+  <main id="top">
     <section class="sequence" id="sequence" aria-label="Scroll-controlled film: a treble clef forming from sound">
       <div class="stage" id="stage">
         <canvas id="film-canvas" role="img" aria-label="Sound waves converge, break into particles, and assemble into a glass treble clef as the page scrolls"></canvas>
@@ -928,6 +1139,32 @@
               <p class="chapter__eyebrow micro">A — The tool</p>
               <h1 class="chapter__title reveal"><span>Solfai</span></h1>
               <p class="chapter__deck reveal"><span>Sheet music in. Your key, your part, your starting pitch — out.</span></p>
+
+              <div class="hero-actions">
+                <a class="btn btn--solid" href="https://solfai-v2.onrender.com">
+                  <span>Upload a score</span>
+                </a>
+                <a class="btn btn--glass glass" href="#contact-title">
+                  <span>See how it reads</span>
+                </a>
+              </div>
+
+              <!-- Facts, not invented metrics: what the tool returns and what it
+                   reads. Numbers a singer can check against their own part. -->
+              <dl class="hero-stats">
+                <div>
+                  <dt>4</dt>
+                  <dd>Outputs<br>per score</dd>
+                </div>
+                <div>
+                  <dt>2</dt>
+                  <dd>Ways<br>to upload</dd>
+                </div>
+                <div>
+                  <dt>7</dt>
+                  <dd>Movable-do<br>syllables</dd>
+                </div>
+              </dl>
             </div>
           </article>
 
@@ -1028,7 +1265,7 @@
         </figure>
       </div>
 
-      <div class="editorial__note reveal-up">
+      <div class="editorial__note reveal-up" id="story">
         <strong>Built at the intersection of two things I care about.</strong>
         <div>
           <p>Choir has been a real part of my life for four years. So has building things. Solfai came out of putting those together — the tool I wished existed, standing in rehearsal without a piano and not enough time.</p>
@@ -1243,6 +1480,23 @@
       let pushScale = 1.15;
       let panX = 0;
       let driftY = 0;
+
+      // Pointer parallax. The film otherwise only moves when the page scrolls,
+      // so it sits dead while the reader pauses to actually read a chapter.
+      // A lerped drift toward the cursor keeps it alive without competing with
+      // the scroll-driven camera. Values are fractions of the stage.
+      const PARALLAX = 0.012;
+      let paraTargetX = 0, paraTargetY = 0;
+      let paraX = 0, paraY = 0;
+
+      window.addEventListener("pointermove", (e) => {
+        if (e.pointerType !== "mouse") return;
+        paraTargetX = ((e.clientX / window.innerWidth) - 0.5) * 2 * PARALLAX;
+        paraTargetY = ((e.clientY / window.innerHeight) - 0.5) * 2 * PARALLAX;
+      }, { passive: true });
+
+      // Ease back to centre when the pointer leaves the window.
+      document.addEventListener("mouseleave", () => { paraTargetX = 0; paraTargetY = 0; });
       let trail = 0;                 // velocity-driven motion trail, 0..TRAIL_MAX
       const TRAIL_MAX = 0.34;
       let lastPush = -1;
@@ -1508,10 +1762,15 @@
         const full = motionMode !== "reduced";
         const drive = Math.min(1, velocity * 160);
 
+        // Pointer parallax eases toward its target and rides on top of the
+        // scroll-driven camera, so the two never fight for the same axis.
+        paraX += (paraTargetX - paraX) * 0.055;
+        paraY += (paraTargetY - paraY) * 0.055;
+
         const shot = cameraAt(effective);
         pushScale = shot.scale;
-        driftY = full ? shot.y : 0;
-        panX = full ? shot.x : 0;
+        driftY = full ? shot.y + paraY : 0;
+        panX = full ? shot.x + paraX : 0;
         // Motion blur only while actually moving; decays back to a clean frame.
         trail = full ? TRAIL_MAX * drive : 0;
 
