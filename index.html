@@ -171,135 +171,26 @@
       position: fixed;
       inset: 0 0 auto;
       z-index: 90;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 20px;
       min-height: 70px;
-      padding: max(14px, env(safe-area-inset-top)) var(--gutter) 12px;
+      padding: max(16px, env(safe-area-inset-top)) var(--gutter) 12px;
+      mix-blend-mode: difference;
       pointer-events: none;
     }
 
-    /* Entrance. The loader used to just vanish and leave a finished page;
-       these stagger in behind it so the hero assembles instead of appearing.
-       Delays are set inline per element from JS. */
-    .enter {
-      opacity: 0;
-      transform: translateY(16px);
-      transition: opacity 760ms var(--ease-out), transform 760ms var(--ease-out);
-    }
-
-    .enter.is-entered { opacity: 1; transform: none; }
-
-    :root[data-motion="reduced"] .enter {
-      opacity: 1;
-      transform: none;
-      transition: none;
-    }
-
-    .skip-link {
-      position: fixed;
-      top: 10px;
-      left: 50%;
-      z-index: 1100;
-      padding: 11px 18px;
-      border-radius: 999px;
-      background: var(--paper);
-      color: var(--ink);
-      font-family: var(--data);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      text-decoration: none;
-      transform: translate(-50%, -180%);
-      transition: transform 220ms var(--ease-out);
-    }
-
-    .skip-link:focus-visible { transform: translate(-50%, 0); }
-
-    /* Floating nav pill. Glass over the film rather than a bar across it, so
-       the frame stays uninterrupted. */
-    .navpill {
-      pointer-events: auto;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 7px 7px 14px;
-      border-radius: 999px;
-    }
-
-    .navpill__brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding-right: 4px;
+    .site-header__brand {
+      justify-self: start;
       font-size: 13px;
       font-weight: 720;
-      letter-spacing: -.015em;
+      letter-spacing: -.02em;
       text-transform: uppercase;
-      text-decoration: none;
-      white-space: nowrap;
     }
 
-    .navpill__mark {
-      font-family: "Segoe UI Symbol", "Noto Music", "Apple Symbols", "Symbola", serif;
-      font-size: 21px;
-      line-height: 0;
-      color: var(--brass);
-      transform: translateY(1px);
-    }
-
-    .navpill__sep {
-      width: 1px;
-      height: 18px;
-      margin: 0 4px;
-      background: rgba(242, 237, 228, .16);
-    }
-
-    .navpill__link {
-      padding: 7px 11px;
-      border-radius: 999px;
-      color: rgba(242, 237, 228, .68);
-      font-family: var(--data);
-      font-size: 10.5px;
-      letter-spacing: .10em;
-      text-transform: uppercase;
-      text-decoration: none;
-      white-space: nowrap;
-      transition: color 200ms ease, background 200ms ease;
-    }
-
-    .navpill__link:hover, .navpill__link:focus-visible {
-      color: var(--paper);
-      background: rgba(242, 237, 228, .08);
-    }
-
-    .navpill__cta {
-      padding: 8px 15px;
-      border-radius: 999px;
-      background: var(--paper);
-      color: var(--ink);
-      font-family: var(--data);
-      font-size: 10.5px;
-      font-weight: 600;
-      letter-spacing: .10em;
-      text-transform: uppercase;
-      text-decoration: none;
-      white-space: nowrap;
-      transition: transform 220ms var(--ease-out), box-shadow 220ms ease;
-    }
-
-    .navpill__cta:hover, .navpill__cta:focus-visible {
-      transform: scale(1.04);
-      box-shadow: 0 0 22px 3px rgba(242, 237, 228, .22);
-    }
-
-    .navpill__cta:active { transform: scale(.975); }
-
-    @media (max-width: 780px) {
-      .navpill__link, .navpill__sep { display: none; }
-      .navpill { gap: 5px; padding-left: 12px; }
-    }
+    .site-header__center { color: rgba(242, 237, 228, .72); }
+    .site-header__end { justify-self: end; text-align: right; color: rgba(242, 237, 228, .72); }
 
     /* ---------- Stage ---------- */
 
@@ -526,240 +417,6 @@
     /* The deep pencil red is for rules and borders; text needs the lighter tint
        to clear AA against the amber footage. */
     .chapter__fact .flag { color: #E8836F; }
-
-    /* ---------- Static hero ----------
-       A held first screen before the scroll film starts. The clef is not a
-       still: moving the pointer scrubs a slice of the real footage, so it
-       turns under the cursor. Idle, it drifts on its own. */
-
-    .hero {
-      position: relative;
-      min-height: 100svh;
-      display: grid;
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      align-content: center;
-      column-gap: clamp(10px, 1.2vw, 20px);
-      padding: 128px var(--gutter) 104px;
-      background: var(--ink);
-      overflow: hidden;
-      isolation: isolate;
-    }
-
-    #hero-canvas {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    .hero__glow {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      background: radial-gradient(ellipse 46% 60% at 63% 50%,
-        rgba(230, 192, 131, .16) 0%, rgba(230, 192, 131, 0) 62%);
-      pointer-events: none;
-    }
-
-    .hero__scrim {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      background: linear-gradient(90deg,
-        rgba(10, 7, 5, .92) 0%, rgba(10, 7, 5, .70) 34%,
-        rgba(10, 7, 5, .10) 62%, transparent 82%);
-      pointer-events: none;
-    }
-
-    .hero__inner {
-      position: relative;
-      z-index: 3;
-      grid-column: 1 / 8;
-      max-width: 40rem;
-    }
-
-    .hero__eyebrow {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 0 0 24px;
-      color: var(--brass);
-      font-family: var(--data);
-      font-size: 10.5px;
-      letter-spacing: .28em;
-      text-transform: uppercase;
-    }
-
-    .hero__eyebrow::before {
-      content: "";
-      width: 34px; height: 1px;
-      background: var(--brass);
-    }
-
-    .hero__title {
-      margin: 0;
-      font-size: clamp(76px, 13.5vw, 210px);
-      font-weight: 800;
-      font-variation-settings: "wdth" var(--hero-wdth, 88);
-      letter-spacing: -.055em;
-      line-height: .82;
-      text-transform: uppercase;
-    }
-
-    .hero__deck {
-      max-width: 26rem;
-      margin: 26px 0 0;
-      font-size: clamp(17px, 1.5vw, 22px);
-      font-weight: 450;
-      line-height: 1.32;
-      letter-spacing: -.022em;
-      color: rgba(242, 237, 228, .78);
-    }
-
-    .hero__cue {
-      position: absolute;
-      left: var(--gutter);
-      bottom: 34px;
-      z-index: 3;
-      display: inline-grid;
-      grid-template-columns: auto 16px;
-      align-items: center;
-      gap: 10px;
-      color: rgba(242, 237, 228, .55);
-      font-family: var(--data);
-      font-size: 10px;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-    }
-
-    .hero__cue::after {
-      content: "";
-      width: 16px; height: 16px;
-      border-right: 1px solid currentColor;
-      border-bottom: 1px solid currentColor;
-      transform: rotate(45deg) translate(-3px, 3px);
-      animation: cue 1.9s ease-in-out infinite;
-    }
-
-    /* A quiet hint that the clef is the interactive part, faded once touched. */
-    .hero__hint {
-      position: absolute;
-      right: var(--gutter);
-      bottom: 34px;
-      z-index: 3;
-      color: rgba(242, 237, 228, .38);
-      font-family: var(--data);
-      font-size: 10px;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      transition: opacity 700ms ease;
-    }
-
-    .hero__hint.is-gone { opacity: 0; }
-
-    @media (max-width: 780px) {
-      .hero { padding: 104px var(--gutter) 92px; align-content: end; }
-      .hero__inner { grid-column: 1 / 13; }
-      .hero__title { font-size: clamp(62px, 19vw, 108px); }
-      .hero__deck { font-size: 16.5px; margin-top: 18px; max-width: 22rem; }
-      /* Keep the clef readable up top; darken only where the copy sits. */
-      .hero__scrim {
-        background: linear-gradient(0deg,
-          rgba(10, 7, 5, .96) 0%, rgba(10, 7, 5, .90) 34%,
-          rgba(10, 7, 5, .38) 56%, rgba(10, 7, 5, .06) 76%);
-      }
-      .hero__glow {
-        background: radial-gradient(ellipse 62% 26% at 50% 32%,
-          rgba(230, 192, 131, .20) 0%, rgba(230, 192, 131, 0) 70%);
-      }
-      .hero__hint { display: none; }
-    }
-
-    :root[data-motion="reduced"] .hero__cue::after { animation: none; }
-
-    /* ---------- Hero actions and stats ---------- */
-
-    .hero-actions {
-      pointer-events: auto;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px;
-      margin-top: 30px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 24px;
-      border-radius: 999px;
-      font-family: var(--data);
-      font-size: 11.5px;
-      font-weight: 600;
-      letter-spacing: .10em;
-      text-transform: uppercase;
-      text-decoration: none;
-      white-space: nowrap;
-      transition: transform 220ms var(--ease-out), box-shadow 260ms ease,
-                  background 220ms ease, color 220ms ease;
-    }
-
-    .btn::after {
-      content: "→";
-      font-size: 14px;
-      transition: transform 260ms var(--ease-out);
-    }
-
-    .btn:hover::after, .btn:focus-visible::after { transform: translateX(4px); }
-    .btn:active { transform: translateY(1px) scale(.985); }
-
-    .btn--solid { background: var(--paper); color: var(--ink); }
-
-    .btn--solid:hover, .btn--solid:focus-visible {
-      transform: scale(1.03);
-      box-shadow: 0 0 26px 4px rgba(242, 237, 228, .24);
-    }
-
-    .btn--glass { color: var(--paper); }
-
-    .btn--glass:hover, .btn--glass:focus-visible {
-      transform: scale(1.03);
-      box-shadow: inset 0 1px 1px rgba(242, 237, 228, .2),
-                  0 0 20px 2px rgba(230, 192, 131, .16);
-    }
-
-    .hero-stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 30px;
-      margin: 34px 0 0;
-      padding-top: 20px;
-      border-top: 1px solid var(--line);
-      max-width: 30rem;
-    }
-
-    .hero-stats div { display: flex; align-items: baseline; gap: 10px; }
-
-    .hero-stats dt {
-      font-size: clamp(26px, 3.2vw, 40px);
-      font-weight: 760;
-      font-variation-settings: "wdth" 88;
-      letter-spacing: -.045em;
-      line-height: 1;
-      color: var(--paper);
-    }
-
-    .hero-stats dd {
-      margin: 0;
-      font-family: var(--data);
-      font-size: 9.5px;
-      line-height: 1.45;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--alloy);
-    }
 
     .chapter--hero { align-content: end; }
     .chapter--hero .chapter__copy { grid-column: 1 / 10; padding-bottom: 6vh; }
@@ -1112,13 +769,8 @@
 
       .chapter--hero { align-content: end; }
       .chapter--hero .chapter__copy { padding-bottom: 2vh; }
-      .chapter--hero .chapter__title { font-size: clamp(64px, 22vw, 110px); }
+      .chapter--hero .chapter__title { font-size: clamp(76px, 27vw, 132px); }
       .chapter--hero .chapter__deck { margin-left: 0; max-width: 19rem; }
-
-      .hero-actions { gap: 10px; margin-top: 20px; }
-      .btn { padding: 12px 18px; font-size: 10.5px; }
-      .hero-stats { gap: 16px; margin-top: 20px; padding-top: 14px; }
-      .hero-stats dd { font-size: 8.5px; }
 
       .chapter--split .chapter__copy { display: block; }
       .chapter--split .split-end { text-align: left; }
@@ -1170,45 +822,6 @@
     :root[data-motion="reduced"] .scroll-cue::after { animation: none; opacity: .6; }
     :root[data-motion="reduced"] .shot:hover img { transform: none; }
 
-    /* Cursor: a note-head outline, the mark a singer pencils onto a score.
-       Fills and grows over anything interactive. Pointer-fine devices only,
-       and removed entirely under reduced motion. */
-    .cursor {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 999;
-      width: 22px;
-      height: 22px;
-      margin: -11px 0 0 -11px;
-      border: 1px solid var(--brass);
-      border-radius: 50% 50% 48% 52% / 52% 48% 50% 50%;
-      background: transparent;
-      opacity: 0;
-      pointer-events: none;
-      transform: translate3d(-100px, -100px, 0) rotate(-18deg);
-      transition: width 260ms var(--ease-out), height 260ms var(--ease-out),
-                  margin 260ms var(--ease-out), background 260ms ease,
-                  opacity 260ms ease, border-color 260ms ease;
-      will-change: transform;
-    }
-
-    .cursor.is-live { opacity: .85; }
-
-    .cursor.is-hot {
-      width: 44px;
-      height: 44px;
-      margin: -22px 0 0 -22px;
-      background: rgba(230, 192, 131, .22);
-      border-color: var(--paper);
-    }
-
-    @media (hover: none), (pointer: coarse) {
-      .cursor { display: none; }
-    }
-
-    :root[data-motion="reduced"] .cursor { display: none; }
-
     /* Editorial section rises into place as it enters the viewport. */
     .reveal-up {
       opacity: 0;
@@ -1221,23 +834,6 @@
     .reveal-up:nth-of-type(3) { transition-delay: 160ms; }
 
     :root[data-motion="reduced"] .reveal-up { opacity: 1; transform: none; transition: none; }
-
-    /* Glass surface. The gradient edge is done with padding-box/border-box
-       layering rather than a ::before, because the controls already use that
-       pseudo for their fill sweep and status dot. Tinted brass rather than
-       white so it reads as part of this page, not a borrowed component. */
-    /* Glass over a near-black ground has nothing to refract, so the luminosity
-       blend just muddied into brown. Neutral tint, hairline edge, real blur —
-       it reads as glass because it is quiet, not because it is tinted. */
-    .glass {
-      background: rgba(20, 16, 12, .38);
-      border: 1px solid rgba(242, 237, 228, .12);
-      backdrop-filter: blur(14px) saturate(1.15);
-      -webkit-backdrop-filter: blur(14px) saturate(1.15);
-      box-shadow:
-        inset 0 1px 0 rgba(242, 237, 228, .10),
-        0 8px 30px rgba(0, 0, 0, .35);
-    }
 
     .motion-toggle {
       pointer-events: auto;
@@ -1287,71 +883,19 @@
     </div>
   </div>
 
-  <!-- The film is a long scroll; keyboard users get a way past it. -->
-  <a class="skip-link" href="#contact-title">Skip the film</a>
-
-  <header class="site-header" aria-label="Primary">
-    <nav class="navpill glass">
-      <a class="navpill__brand" href="#top">
-        <span class="navpill__mark" aria-hidden="true">&#x1D11E;</span>
-        <span>Solfai</span>
-      </a>
-      <span class="navpill__sep" aria-hidden="true"></span>
-      <a class="navpill__link" href="#contact-title">How it reads</a>
-      <a class="navpill__link" href="#story">Story</a>
-      <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">
-        <span id="motion-label">Full motion</span>
-      </button>
-      <a class="navpill__cta" href="https://solfai-v2.onrender.com">Open Solfai</a>
-    </nav>
+  <header class="site-header" aria-label="Project information">
+    <div class="site-header__brand">Solfai</div>
+    <div class="site-header__center micro">Sheet music in, solfège out</div>
+    <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">
+      <span id="motion-label">Full motion</span>
+    </button>
   </header>
 
   <noscript>
     <p class="noscript-note">This page plays a 110-frame film as you scroll, which needs JavaScript. Solfai itself works without it.</p>
   </noscript>
 
-  <main id="top">
-    <section class="hero" aria-label="Solfai">
-      <canvas id="hero-canvas" role="img" aria-label="A glass treble clef turning as the pointer moves"></canvas>
-      <div class="hero__glow" aria-hidden="true"></div>
-      <div class="hero__scrim" aria-hidden="true"></div>
-
-      <div class="hero__inner">
-        <p class="hero__eyebrow">Movable-do solfège</p>
-        <h1 class="hero__title" id="hero-title">Solfai</h1>
-        <p class="hero__deck">Upload a score. Get your key, your part, your starting pitch, and the measures most likely to trip you up.</p>
-
-        <div class="hero-actions">
-          <a class="btn btn--solid" href="https://solfai-v2.onrender.com">
-            <span>Upload a score</span>
-          </a>
-          <a class="btn btn--glass glass" href="#contact-title">
-            <span>See how it reads</span>
-          </a>
-        </div>
-
-        <!-- Facts a singer can check against their own part, not invented
-             traction numbers. -->
-        <dl class="hero-stats">
-          <div>
-            <dt>4</dt>
-            <dd>Outputs<br>per score</dd>
-          </div>
-          <div>
-            <dt>2</dt>
-            <dd>Ways<br>to upload</dd>
-          </div>
-          <div>
-            <dt>7</dt>
-            <dd>Movable-do<br>syllables</dd>
-          </div>
-        </dl>
-      </div>
-
-      <span class="hero__cue">Scroll</span>
-      <span class="hero__hint" id="hero-hint">Move to turn it</span>
-    </section>
-
+  <main>
     <section class="sequence" id="sequence" aria-label="Scroll-controlled film: a treble clef forming from sound">
       <div class="stage" id="stage">
         <canvas id="film-canvas" role="img" aria-label="Sound waves converge, break into particles, and assemble into a glass treble clef as the page scrolls"></canvas>
@@ -1365,9 +909,9 @@
         <div class="chapters" aria-live="off">
           <article class="chapter chapter--hero" data-center="0.075" data-window="0.080" data-label="The tool" data-syllable="do">
             <div class="chapter__copy">
-              <p class="chapter__eyebrow micro">A — Sound before notation</p>
-              <h2 class="chapter__title reveal"><span>It starts<br>as sound</span></h2>
-              <p class="chapter__deck reveal"><span>Before it is notation, it is a pitch in a room. Solfai works back the other way.</span></p>
+              <p class="chapter__eyebrow micro">A — The tool</p>
+              <h1 class="chapter__title reveal"><span>Solfai</span></h1>
+              <p class="chapter__deck reveal"><span>Sheet music in. Your key, your part, your starting pitch — out.</span></p>
             </div>
           </article>
 
@@ -1401,14 +945,10 @@
             <div class="chapter__copy">
               <div>
                 <p class="chapter__eyebrow micro">E — Two ways in</p>
-                <!-- One phrase split across two grid cells. It carries the whole
-                     line as its accessible name so screen readers don't hear
-                     "Exact" and "or read" as two unrelated headings; the visual
-                     second half is then decorative. -->
-                <h2 class="chapter__title reveal" aria-label="Exact, or read"><span>Exact</span></h2>
+                <h2 class="chapter__title reveal"><span>Exact</span></h2>
               </div>
               <div class="split-end">
-                <p class="chapter__title reveal" aria-hidden="true"><span>or read</span></p>
+                <h2 class="chapter__title reveal"><span>or read</span></h2>
                 <p class="chapter__deck reveal"><span>MusicXML gives exact data. A photo or PDF gets read, then cross-checked.</span></p>
               </div>
             </div>
@@ -1472,7 +1012,7 @@
         </figure>
       </div>
 
-      <div class="editorial__note reveal-up" id="story">
+      <div class="editorial__note reveal-up">
         <strong>Built at the intersection of two things I care about.</strong>
         <div>
           <p>Choir has been a real part of my life for four years. So has building things. Solfai came out of putting those together — the tool I wished existed, standing in rehearsal without a piano and not enough time.</p>
@@ -1481,8 +1021,6 @@
       </div>
     </section>
   </main>
-
-  <div class="cursor" id="cursor" aria-hidden="true"></div>
 
   <footer class="site-footer micro">
     <p>Solfai — movable-do solfège from sheet music. Film sequence: 957 frames, 13.27 seconds.</p>
@@ -1687,23 +1225,6 @@
       let pushScale = 1.15;
       let panX = 0;
       let driftY = 0;
-
-      // Pointer parallax. The film otherwise only moves when the page scrolls,
-      // so it sits dead while the reader pauses to actually read a chapter.
-      // A lerped drift toward the cursor keeps it alive without competing with
-      // the scroll-driven camera. Values are fractions of the stage.
-      const PARALLAX = 0.012;
-      let paraTargetX = 0, paraTargetY = 0;
-      let paraX = 0, paraY = 0;
-
-      window.addEventListener("pointermove", (e) => {
-        if (e.pointerType !== "mouse") return;
-        paraTargetX = ((e.clientX / window.innerWidth) - 0.5) * 2 * PARALLAX;
-        paraTargetY = ((e.clientY / window.innerHeight) - 0.5) * 2 * PARALLAX;
-      }, { passive: true });
-
-      // Ease back to centre when the pointer leaves the window.
-      document.addEventListener("mouseleave", () => { paraTargetX = 0; paraTargetY = 0; });
       let trail = 0;                 // velocity-driven motion trail, 0..TRAIL_MAX
       const TRAIL_MAX = 0.34;
       let lastPush = -1;
@@ -1925,38 +1446,10 @@
         stage.style.setProperty("--cue-opacity", effective > 0.075 ? "0" : "1");
       }
 
-      // Elements that assemble behind the loader wipe, in reading order.
-      const ENTRANCE = [".navpill", ".hero-actions", ".hero-stats", ".rail"];
-
-      function primeEntrance() {
-        ENTRANCE.forEach((sel) => {
-          const el = document.querySelector(sel);
-          if (el) el.classList.add("enter");
-        });
-      }
-
-      function playEntrance() {
-        ENTRANCE.forEach((sel, i) => {
-          const el = document.querySelector(sel);
-          if (!el) return;
-          // Start after the loader's clip-path wipe is underway, then stagger.
-          el.style.transitionDelay = (260 + i * 110) + "ms";
-          requestAnimationFrame(() => el.classList.add("is-entered"));
-        });
-        // Clear the delays afterwards so they never affect later transitions.
-        window.setTimeout(() => {
-          ENTRANCE.forEach((sel) => {
-            const el = document.querySelector(sel);
-            if (el) el.style.transitionDelay = "";
-          });
-        }, 1800);
-      }
-
       function dismissLoader() {
         setLoaderProgress(1);
         loader.classList.add("is-done");
         document.body.classList.remove("is-loading");
-        playEntrance();
         window.setTimeout(() => loader.remove(), 1000);
       }
 
@@ -1997,15 +1490,10 @@
         const full = motionMode !== "reduced";
         const drive = Math.min(1, velocity * 160);
 
-        // Pointer parallax eases toward its target and rides on top of the
-        // scroll-driven camera, so the two never fight for the same axis.
-        paraX += (paraTargetX - paraX) * 0.055;
-        paraY += (paraTargetY - paraY) * 0.055;
-
         const shot = cameraAt(effective);
         pushScale = shot.scale;
-        driftY = full ? shot.y + paraY : 0;
-        panX = full ? shot.x + paraX : 0;
+        driftY = full ? shot.y : 0;
+        panX = full ? shot.x : 0;
         // Motion blur only while actually moving; decays back to a clean frame.
         trail = full ? TRAIL_MAX * drive : 0;
 
@@ -2116,164 +1604,6 @@
         const byDistance = Array.from({ length: FRAME_COUNT }, (_, index) => index)
           .sort((a, b) => Math.abs(a - frame) - Math.abs(b - frame));
         loadInBatches(byDistance, 16, activeStore);
-      }
-
-      // ---- Static hero: the clef turns under the pointer --------------------
-      // Rather than a still image, the hero scrubs a slice of the real footage
-      // where the formed clef rotates. Pointer X picks the frame, so moving the
-      // mouse turns the object. Left alone it drifts on a slow sine, so it is
-      // never dead. Uses the same frame files as the film — no extra payload.
-      const HERO_FROM = 792;          // clef solid and turning
-      const HERO_TO = 944;            // just before the sequence settles
-      const HERO_SAMPLES = 34;
-
-      const heroCanvas = document.getElementById("hero-canvas");
-      const heroHint = document.getElementById("hero-hint");
-
-      if (heroCanvas) {
-        const hctx = heroCanvas.getContext("2d", { alpha: false });
-        const heroImgs = new Array(HERO_SAMPLES).fill(null);
-        let heroReady = 0;
-        let heroTargetT = 0.5;     // 0..1 across the rotation slice
-        let heroT = 0.5;
-        let heroTouched = false;
-        let heroLastDrawn = -1;
-        let heroRaf = 0;
-
-        const heroIndexFor = (i) =>
-          Math.round(HERO_FROM + (HERO_TO - HERO_FROM) * (i / (HERO_SAMPLES - 1)));
-
-        function sizeHero() {
-          const dpr = Math.min(window.devicePixelRatio || 1, 2);
-          const w = Math.round(heroCanvas.clientWidth * dpr);
-          const h = Math.round(heroCanvas.clientHeight * dpr);
-          if (w && h && (heroCanvas.width !== w || heroCanvas.height !== h)) {
-            heroCanvas.width = w;
-            heroCanvas.height = h;
-            heroLastDrawn = -1;
-          }
-        }
-
-        function drawHero(slot) {
-          const img = heroImgs[slot];
-          if (!img || !img.naturalWidth) return;
-          const w = heroCanvas.width, h = heroCanvas.height;
-          hctx.fillStyle = "#0A0705";
-          hctx.fillRect(0, 0, w, h);
-
-          let fit, dx, dy;
-          if (w / h < 0.95) {
-            // Narrow: contain would render the clef tiny inside a 16:9 frame.
-            // Scale by height and let the empty sides crop away, then sit it in
-            // the upper half so the copy below has its own room.
-            fit = (h * 0.56) / img.naturalHeight;
-            const dwN = img.naturalWidth * fit;
-            const dhN = img.naturalHeight * fit;
-            dx = (w - dwN) / 2;
-            dy = h * 0.34 - dhN / 2;
-            hctx.drawImage(img, dx, dy, dwN, dhN);
-          } else {
-            // Wide: contain, biased right so the type keeps clean space left.
-            fit = Math.min(w / img.naturalWidth, h / img.naturalHeight) * 1.04;
-            const dwW = img.naturalWidth * fit;
-            const dhW = img.naturalHeight * fit;
-            hctx.drawImage(img, (w - dwW) / 2 + w * 0.13, (h - dhW) / 2, dwW, dhW);
-          }
-          heroLastDrawn = slot;
-        }
-
-        function heroTick() {
-          // Ease toward the pointer; drift gently when untouched.
-          const target = heroTouched
-            ? heroTargetT
-            : 0.5 + Math.sin(performance.now() * 0.00035) * 0.42;
-          heroT += (target - heroT) * 0.085;
-          const slot = Math.max(0, Math.min(HERO_SAMPLES - 1,
-            Math.round(heroT * (HERO_SAMPLES - 1))));
-          if (slot !== heroLastDrawn && heroImgs[slot]) drawHero(slot);
-          heroRaf = requestAnimationFrame(heroTick);
-        }
-
-        // Load the slice: middle first so something shows immediately.
-        const order = Array.from({ length: HERO_SAMPLES }, (_, i) => i)
-          .sort((a, b) => Math.abs(a - 17) - Math.abs(b - 17));
-
-        order.forEach((slot) => {
-          const im = new Image();
-          im.decoding = "async";
-          im.onload = () => {
-            heroImgs[slot] = im;
-            heroReady += 1;
-            if (heroReady === 1) { sizeHero(); drawHero(slot); heroTick(); }
-          };
-          im.src = "frames/desktop/frame-" +
-            String(heroIndexFor(slot)).padStart(4, "0") + ".webp";
-        });
-
-        window.addEventListener("pointermove", (e) => {
-          if (e.pointerType !== "mouse") return;
-          const r = heroCanvas.getBoundingClientRect();
-          if (r.bottom < 0) return;                 // hero scrolled away
-          heroTargetT = Math.max(0, Math.min(1, e.clientX / window.innerWidth));
-          if (!heroTouched) {
-            heroTouched = true;
-            if (heroHint) heroHint.classList.add("is-gone");
-          }
-        }, { passive: true });
-
-        window.addEventListener("resize", () => { sizeHero(); }, { passive: true });
-
-        // Pause the hero loop once it is off screen.
-        if ("IntersectionObserver" in window) {
-          new IntersectionObserver((entries) => {
-            for (const en of entries) {
-              if (en.isIntersecting && !heroRaf && heroReady) heroTick();
-              else if (!en.isIntersecting && heroRaf) {
-                cancelAnimationFrame(heroRaf);
-                heroRaf = 0;
-              }
-            }
-          }, { threshold: 0.01 }).observe(heroCanvas);
-        }
-      }
-
-      // ---- Cursor -----------------------------------------------------------
-      // A note-head that trails the pointer slightly and fills over anything
-      // interactive. Pointer-fine only, and skipped entirely in reduced motion.
-      const cursorEl = document.getElementById("cursor");
-      const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-
-      if (finePointer && cursorEl) {
-        let cx = -100, cy = -100, tx = -100, ty = -100, cursorRaf = 0, live = false;
-
-        function cursorTick() {
-          cx += (tx - cx) * 0.20;
-          cy += (ty - cy) * 0.20;
-          const spin = -18 + (tx - cx) * 1.6;
-          cursorEl.style.transform =
-            "translate3d(" + cx.toFixed(1) + "px," + cy.toFixed(1) + "px,0) rotate(" + spin.toFixed(1) + "deg)";
-          cursorRaf = requestAnimationFrame(cursorTick);
-        }
-
-        window.addEventListener("pointermove", (e) => {
-          if (e.pointerType !== "mouse") return;
-          tx = e.clientX;
-          ty = e.clientY;
-          if (!live) {
-            live = true;
-            cx = tx; cy = ty;
-            cursorEl.classList.add("is-live");
-            cursorTick();
-          }
-          const hot = e.target instanceof Element &&
-            e.target.closest("a, button, .shot");
-          cursorEl.classList.toggle("is-hot", !!hot);
-        }, { passive: true });
-
-        window.addEventListener("pointerdown", () => cursorEl.classList.add("is-hot"));
-        window.addEventListener("pointerup", () => cursorEl.classList.remove("is-hot"));
-        document.addEventListener("mouseleave", () => cursorEl.classList.remove("is-live"));
-        document.addEventListener("mouseenter", () => { if (live) cursorEl.classList.add("is-live"); });
       }
 
       // ---- Editorial reveals -------------------------------------------------
