@@ -58,8 +58,9 @@
       --display: "JetBrains Mono", ui-monospace, "IBM Plex Mono", monospace;
       --data: "IBM Plex Mono", ui-monospace, monospace;
       --body: "Archivo", system-ui, sans-serif;
-      /* Single accent, used only as a marker — never as a fill. */
-      --mark: #E8593A;
+      /* Marker dots are plain light — the page already has enough warmth
+         coming off the film itself. */
+      --mark: #F2EDE4;
       --gutter: clamp(20px, 4.2vw, 72px);
       --ease-out: cubic-bezier(.22, 1, .36, 1);
       --line: rgba(242, 237, 228, .17);
@@ -317,6 +318,7 @@
       top: .52em;
       width: 6px;
       height: 6px;
+      border-radius: 50%;
       background: var(--mark);
     }
 
@@ -787,7 +789,72 @@
       transition: transform 900ms var(--ease-out);
     }
 
-    .shot:hover img { transform: scale(1.018); }
+    /* Stills were dead weight after the film. Each one now drifts against the
+       scroll at its own rate, wipes open on entry, and lifts under the cursor,
+       so the section reads as a continuation of the sequence rather than a
+       gallery bolted onto the end. --p is written from JS: -1 below the fold,
+       0 centred, 1 above. */
+    .shot {
+      clip-path: inset(0 0 100% 0);
+      transition: clip-path 1000ms var(--ease-out);
+      will-change: clip-path;
+    }
+
+    .shot.is-in { clip-path: inset(0 0 0% 0); }
+
+    .shot img {
+      transform: scale(1.14) translate3d(0, calc(var(--p, 0) * -22px), 0);
+      transition: transform 900ms cubic-bezier(.16, 1, .3, 1), filter 500ms ease;
+      filter: saturate(.9) contrast(1.02);
+      will-change: transform;
+    }
+
+    /* Alternate the drift direction so the grid never marches in lockstep. */
+    .shot--top img, .shot--end img {
+      transform: scale(1.14) translate3d(0, calc(var(--p, 0) * 26px), 0);
+    }
+
+    .shot:hover img {
+      transform: scale(1.2) translate3d(0, calc(var(--p, 0) * -22px), 0);
+      filter: saturate(1.06) contrast(1.05);
+    }
+
+    .shot--top:hover img, .shot--end:hover img {
+      transform: scale(1.2) translate3d(0, calc(var(--p, 0) * 26px), 0);
+    }
+
+    /* Caption sits flush until hover, then lifts clear of the frame edge. */
+    .shot figcaption {
+      transform: translateY(100%);
+      transition: transform 520ms var(--ease-out);
+    }
+
+    .shot.is-in figcaption { transform: translateY(0); }
+
+    /* A hairline that draws across the image as it lands. */
+    .shot::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background: var(--paper);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 900ms 220ms var(--ease-out);
+    }
+
+    .shot.is-in::after { transform: scaleX(1); }
+
+    :root[data-motion="reduced"] .shot,
+    :root[data-motion="reduced"] .shot img,
+    :root[data-motion="reduced"] .shot figcaption,
+    :root[data-motion="reduced"] .shot::after {
+      clip-path: none;
+      transform: none;
+      transition: none;
+    }
 
     .shot figcaption {
       position: absolute;
@@ -949,6 +1016,58 @@
     }
 
     .reveal-up.is-in { opacity: 1; transform: none; }
+
+    /* The section headline wipes up out of its own line rather than fading. */
+    .editorial__title {
+      clip-path: inset(0 0 110% 0);
+      transition: clip-path 1000ms var(--ease-out);
+    }
+
+    .reveal-up.is-in .editorial__title { clip-path: inset(0 0 -10% 0); }
+
+    /* Path cards: a rule draws across the top as each lands, and the card
+       lifts under the cursor so the two options feel selectable. */
+    .path {
+      position: relative;
+      transition: transform 480ms var(--ease-out), background 480ms ease;
+    }
+
+    .path::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: currentColor;
+      opacity: .5;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 900ms var(--ease-out);
+    }
+
+    .reveal-up.is-in .path::before { transform: scaleX(1); }
+    .reveal-up.is-in .path--soft::before { transition-delay: 180ms; }
+
+    .path:hover { transform: translateY(-4px); }
+
+    /* Story block: the standfirst wipes in the same way as the headline. */
+    .editorial__note strong {
+      display: block;
+      clip-path: inset(0 0 110% 0);
+      transition: clip-path 1000ms 120ms var(--ease-out);
+    }
+
+    .reveal-up.is-in .editorial__note strong,
+    .editorial__note.is-in strong { clip-path: inset(0 0 -10% 0); }
+
+    :root[data-motion="reduced"] .editorial__title,
+    :root[data-motion="reduced"] .editorial__note strong {
+      clip-path: none;
+      transition: none;
+    }
+
+    :root[data-motion="reduced"] .path::before { transform: scaleX(1); transition: none; }
     .reveal-up:nth-of-type(2) { transition-delay: 80ms; }
     .reveal-up:nth-of-type(3) { transition-delay: 160ms; }
 
@@ -1002,15 +1121,6 @@
     </div>
   </div>
 
-  <!-- Chrome stripped at the author's call: no brand bar, no nav, no rail.
-       The film carries the screen on its own. The motion control stays because
-       it is an accessibility affordance, not decoration — it is the only way a
-       reduced-motion viewer can opt back into the full sequence. -->
-  <header class="site-header" aria-label="Motion preference">
-    <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">
-      <span id="motion-label">Full motion</span>
-    </button>
-  </header>
 
   <noscript>
     <p class="noscript-note">This page plays a 110-frame film as you scroll, which needs JavaScript. Solfai itself works without it.</p>
@@ -1175,39 +1285,14 @@
       const railMeasure = document.getElementById("rail-measure");
       const railSyllable = document.getElementById("rail-syllable");
       const chapters = Array.from(document.querySelectorAll(".chapter"));
-      const motionToggle = document.getElementById("motion-toggle");
-      const motionLabel = document.getElementById("motion-label");
       const mobileMedia = window.matchMedia(MOBILE_QUERY);
 
-      // Motion mode never removes the film — the viewer drives every frame by
-      // scrolling, so nothing autoplays in either mode. Reduced mode drops the
-      // frame easing and the DOM entrance transforms.
-      const STORAGE_KEY = "solfai-motion";
-      let storedMode = null;
-      try { storedMode = window.localStorage.getItem(STORAGE_KEY); } catch (e) { storedMode = null; }
-      let motionMode = storedMode === "full" || storedMode === "reduced"
-        ? storedMode
-        : (window.matchMedia(REDUCED_QUERY).matches ? "reduced" : "full");
-      let lerp = motionMode === "reduced" ? 1 : LERP_FACTOR;
+      // The toggle is gone: the page is always full motion, by request. The
+      // mode variable stays because the render loop and the CSS guards read it.
+      const motionMode = "full";
+      const lerp = LERP_FACTOR;
+      document.documentElement.dataset.motion = motionMode;
 
-      function applyMotionMode() {
-        document.documentElement.dataset.motion = motionMode;
-        lerp = motionMode === "reduced" ? 1 : LERP_FACTOR;
-        motionLabel.textContent = motionMode === "reduced" ? "Reduced motion" : "Full motion";
-        motionToggle.setAttribute("aria-pressed", String(motionMode === "reduced"));
-        motionToggle.setAttribute("aria-label",
-          motionMode === "reduced"
-            ? "Reduced motion is on. Activate for full motion."
-            : "Full motion is on. Activate to reduce motion.");
-      }
-
-      applyMotionMode();
-
-      motionToggle.addEventListener("click", () => {
-        motionMode = motionMode === "reduced" ? "full" : "reduced";
-        try { window.localStorage.setItem(STORAGE_KEY, motionMode); } catch (e) { /* private mode */ }
-        applyMotionMode();
-      });
       const frameStores = {
         desktop: createFrameStore("frames/desktop"),
         mobile: createFrameStore("frames/mobile")
@@ -1723,6 +1808,54 @@
         const byDistance = Array.from({ length: FRAME_COUNT }, (_, index) => index)
           .sort((a, b) => Math.abs(a - frame) - Math.abs(b - frame));
         loadInBatches(byDistance, 16, activeStore);
+      }
+
+      // ---- Contact-sheet drift ----------------------------------------------
+      // Each still gets --p from its position in the viewport (-1 below fold,
+      // 0 centred, 1 above), which CSS turns into a parallax offset. One rAF
+      // pass for all of them, and only while the section is on screen.
+      const shots = Array.from(document.querySelectorAll(".shot"));
+
+      if (shots.length) {
+        let shotsVisible = false;
+        let shotRaf = 0;
+
+        function driftShots() {
+          const h = window.innerHeight;
+          for (const el of shots) {
+            const r = el.getBoundingClientRect();
+            if (r.bottom < -200 || r.top > h + 200) continue;
+            const centre = r.top + r.height / 2;
+            const p = (h / 2 - centre) / (h / 2);
+            el.style.setProperty("--p", Math.max(-1.4, Math.min(1.4, p)).toFixed(3));
+          }
+          revealArrived();
+          shotRaf = shotsVisible ? requestAnimationFrame(driftShots) : 0;
+        }
+
+        // The wipe-open is driven from the same pass as the drift rather than a
+        // second observer: --p already says exactly where each still sits, so a
+        // still is "arrived" once its centre clears the bottom of the viewport.
+        function revealArrived() {
+          for (const el of shots) {
+            if (el.classList.contains("is-in")) continue;
+            const p = parseFloat(el.style.getPropertyValue("--p"));
+            if (!isNaN(p) && p > -0.92) {
+              el.style.transitionDelay = (shots.indexOf(el) % 2) * 130 + "ms";
+              el.classList.add("is-in");
+            }
+          }
+        }
+
+        const sheet = document.querySelector(".contact-sheet");
+        if (sheet && "IntersectionObserver" in window) {
+          new IntersectionObserver((entries) => {
+            shotsVisible = entries.some((e) => e.isIntersecting);
+            if (shotsVisible && !shotRaf) driftShots();
+          }, { rootMargin: "300px 0px" }).observe(sheet);
+        } else {
+          shots.forEach((el) => el.classList.add("is-in"));
+        }
       }
 
       // ---- Editorial reveals -------------------------------------------------
